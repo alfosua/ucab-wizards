@@ -38,6 +38,7 @@ def run():
         game.set_pause(False)
 
     # controles para cambiar de estado
+    current_state = states.get_state()
     if keys_down[pygame.K_1]:
         states.change_state(states.INTRO)
     if keys_down[pygame.K_2]:
@@ -48,6 +49,8 @@ def run():
         states.change_state(states.LOAD_GAME_MENU)
     if keys_down[pygame.K_5]:
         states.change_state(states.CREDITS)
+    if states.get_state() != current_state:
+        music.stop()
 
     # renderización de elementos en la pantalla
 
