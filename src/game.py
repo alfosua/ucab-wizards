@@ -68,6 +68,11 @@ def init_frame():
             keys_down[event.key] = True
 
 
+def finish_frame():
+    # añadir lógica de finalización de información general
+    pass
+
+
 def is_paused():
     return paused
 
@@ -98,3 +103,6 @@ def get_keys_pressed():
 
 def get_keys_down():
     return keys_down
+
+def is_any_key_down():
+    return any(value for value in keys_down.values())

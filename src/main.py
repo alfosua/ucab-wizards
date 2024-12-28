@@ -42,6 +42,7 @@ import wip
 while game.running:
     # inicializar frame
     game.init_frame() # información general del juego
+    states.init_frame() # información del estado de juego
 
     # limpiar contenido dibujado anteriormente
     screen.fill("black")
@@ -88,6 +89,7 @@ while game.running:
 
     # finalizar frame
     states.finish_frame() # información del estado de juego
+    game.finish_frame() # información general del juego
 
     clock.tick(60)  # limitar frames por segundo a 60
 

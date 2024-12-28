@@ -26,7 +26,7 @@ def run():
     elapsed_seconds_in_paused_wip = paused_wip_ticks // 1000
 
     # empezar a reproducir música (solo en el primer frame)
-    if states.is_first_frame():
+    if states.is_entering_state():
         music.play_secret()
 
     # procesamiento de interacciones por el usuario
@@ -38,7 +38,6 @@ def run():
         game.set_pause(False)
 
     # controles para cambiar de estado
-    current_state = states.get_state()
     if keys_down[pygame.K_1]:
         states.change_state(states.INTRO)
     if keys_down[pygame.K_2]:
@@ -49,8 +48,6 @@ def run():
         states.change_state(states.LOAD_GAME_MENU)
     if keys_down[pygame.K_5]:
         states.change_state(states.CREDITS)
-    if states.get_state() != current_state:
-        music.stop()
 
     # renderización de elementos en la pantalla
 
@@ -66,3 +63,7 @@ def run():
     if game.is_paused():
         paused_seconds_text = fonts.body.render(strings.wip_seconds_paused_message.format(elapsed_seconds_in_paused_wip), False, "white")
         screen.blit(paused_seconds_text, (screen_rect.centerx - seconds_text.get_width() // 2, screen_rect.bottom - seconds_text.get_height() - 80))
+    
+    # pausar música cuando este saliendo del estado
+    if states.is_exiting_state():
+        music.stop()

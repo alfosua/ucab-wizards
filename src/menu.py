@@ -12,15 +12,13 @@ import wip # eliminar esta línea al empezar a trabajar en esta pantalla
 background = pygame.Surface(game.get_screen_rect().size)
 
 def run_intro():
-    # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
     current_ticks = game.get_current_ticks()
-    keys_down = game.get_keys_down()
 
     intro_ticks = current_ticks - states.get_started_at()
 
-    if states.is_first_frame():
+    if states.is_entering_state():
         sounds.konami_intro.play()
 
     ucab_logo_rect = images.ucab_logo.get_rect()
@@ -65,10 +63,12 @@ def run_intro():
         images.pygame_logo.set_alpha(alpha)
         screen.blit(images.pygame_logo, pygame_logo_pos)
     
-    if intro_ticks > 14000 or any(value for value in keys_down.values()):
+    if intro_ticks > 14000 or game.is_any_key_down():
         states.change_state(states.TITLESCREEN)
+    
+    if states.is_exiting_state():
         sounds.konami_intro.stop()
-
+    
 
 def run_titlescreen():
     # obtener información general del juego para uso posterior
