@@ -51,36 +51,36 @@ while game.running:
     if states.is_current(states.INTRO):
         menu.run_intro()
 
-    if states.is_current(states.TITLESCREEN):
+    elif states.is_current(states.TITLESCREEN):
         menu.run_titlescreen()
 
-    if states.is_current(states.MAIN_MENU):
+    elif states.is_current(states.MAIN_MENU):
         menu.run_main_menu()
 
-    if states.is_current(states.LOAD_GAME_MENU):
+    elif states.is_current(states.LOAD_GAME_MENU):
         menu.run_load_game()
 
-    if states.is_current(states.CREDITS):
+    elif states.is_current(states.CREDITS):
         menu.run_credits()
     
     # para los estados en juego
-    if states.is_current(states.EXPLORATION):
+    elif states.is_current(states.EXPLORATION):
         exploration.run()
 
-    if states.is_current(states.BATTLE):
+    elif states.is_current(states.BATTLE):
         battle.run_battle()
 
-    if states.is_current(states.VICTORY):
+    elif states.is_current(states.VICTORY):
         battle.run_victory()
 
-    if states.is_current(states.GAMEOVER):
+    elif states.is_current(states.GAMEOVER):
         battle.run_gameover()
 
-    if states.is_current(states.ENDGAME):
+    elif states.is_current(states.ENDGAME):
         menu.run_endgame()
 
     # para los estados de depuración
-    if states.is_current(states.WIP):
+    elif states.is_current(states.WIP):
         wip.run()
 
     # mostrar cambios realizados en pantalla

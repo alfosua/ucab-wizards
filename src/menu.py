@@ -65,7 +65,7 @@ def run_intro():
         images.pygame_logo.set_alpha(alpha)
         screen.blit(images.pygame_logo, pygame_logo_pos)
     
-    if intro_ticks > 14000:
+    if intro_ticks > 14000 or any(value for value in keys_down.values()):
         states.change_state(states.TITLESCREEN)
         sounds.konami_intro.stop()
 
