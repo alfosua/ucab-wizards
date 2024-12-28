@@ -49,23 +49,15 @@ while game.running:
     # ejecutar lógica de juego según el estado actual
     # para los estados de menués
     if states.is_current(states.INTRO):
-        # TODO: implementar pantalla de introducción
-        # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
         menu.run_intro()
 
     if states.is_current(states.TITLESCREEN):
-        # TODO: implementar pantalla de título de juego
-        # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
         menu.run_titlescreen()
 
     if states.is_current(states.MAIN_MENU):
-        # TODO: implementar pantalla de menú de juego
-        # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
         menu.run_main_menu()
 
     if states.is_current(states.LOAD_GAME_MENU):
-        # TODO: implementar pantalla de cargar partida de juego
-        # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
         menu.run_load_game()
 
     if states.is_current(states.CREDITS):
