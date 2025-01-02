@@ -5,8 +5,9 @@ import game
 INTRO = 0
 TITLESCREEN = 1
 MAIN_MENU = 2
-LOAD_GAME_MENU = 3
-CREDITS = 4
+NEW_GAME_MENU = 3
+LOAD_GAME_MENU = 4
+CREDITS = 5
 # en juego
 LOADING = 100
 EXPLORATION = 101
@@ -52,6 +53,9 @@ def change_state(new_state):
 
 def get_state():
     return current_state
+
+def get_current_state_ticks():
+    return game.get_current_ticks() - current_state_started
 
 def get_started_at():
     return current_state_started

@@ -5,6 +5,7 @@ import pygame
 
 # inicializar información general de la ejecución de la partida
 running = True               # bandera para definir si el juego se encuentra ejecutando
+events = []                  # lista de eventos capturados
 paused = False               # bandera para definir si el juego se encuentra en pausa
 pause_started = 0            # cuando la pause comenzó
 elapsed_ticks = 0            # la cantidad de ticks pasados desde el último frame (respetando la pausa de juego)
@@ -44,6 +45,7 @@ def init_frame():
     global unescaled_elapsed_ticks
     global unscaled_current_ticks
     global keys_down
+    global events
 
     # capturar información para temporizadores
     unescaled_elapsed_ticks = pygame.time.get_ticks() - unscaled_current_ticks
@@ -60,8 +62,9 @@ def init_frame():
     # inicializar información para seguimiento de teclas
     keys_down = {key: False for key in keys_to_track}
 
+    events = pygame.event.get()
     # inicialmente procesar los eventos para lógica básica y captura
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
@@ -85,6 +88,9 @@ def set_pause(value: bool):
 
 def get_screen():
     return pygame.display.get_surface()
+
+def get_events():
+    return events
 
 def get_screen_rect():
     return get_screen().get_rect()
