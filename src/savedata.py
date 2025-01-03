@@ -8,12 +8,12 @@ def init():
 
     # crear archivo indice si no existe
     if not os.path.exists("saves/index.txt"):
-        with open("saves/index.txt", "w") as f:
+        with open("saves/index.txt", "w", encoding='utf-8') as f:
             f.write("")
 
 # inicializar guarda
 def init_save(nombre: str, skin: str, fecha: str, archivo: str):
-    with open("saves/index.txt", "a") as f:
+    with open("saves/index.txt", "a", encoding='utf-8') as f:
         f.write(nombre + "," + skin + "," + fecha + "," + archivo + "\n")
     with open("saves/" + archivo, "w") as f:
         f.write("")

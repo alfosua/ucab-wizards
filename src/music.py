@@ -2,7 +2,7 @@ import pygame
 
 # inicializar variables del estado de música
 playing = False  # bandera que define si la musica está ejecutandose
-volume = 0.5     # el volumen actual de la música
+volume = 1       # el volumen actual de la música
 
 def play(filepath: str, loops: int = -1, volume_multiplier: float = 1):
     global playing
