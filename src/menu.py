@@ -15,8 +15,6 @@ import music
 import wip # eliminar esta línea al empezar a trabajar en esta pantalla
 
 white_background = pygame.Surface(game.get_screen_rect().size)
-black_foreground = pygame.Surface(game.get_screen_rect().size)
-black_foreground.fill("black")
 
 
 def run_intro():
@@ -80,28 +78,25 @@ def run_intro():
 
 def run_titlescreen():
     # obtener información general del juego para uso posterior
-    screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    titlescreen_ticks = states.get_current_state_ticks()
+    current_ticks = states.get_current_state_ticks()
     
     if states.is_entering_state():
         music.play_parchment_0()
         
     draw_titlescreen_background()
     
-    game_logo_wave_y = math.sin(titlescreen_ticks / 360) * 20
+    game_logo_wave_y = math.sin(current_ticks / 360) * 20
 
     interface.draw_surface(images.titlescreen_game_logo, (screen_rect.centerx, screen_rect.centery - game_logo_wave_y - 50))
 
-    if titlescreen_ticks // 750 % 2 == 0:
+    if current_ticks // 750 % 2 == 0:
         interface.draw_surface(texts.menu_press_any_button, (screen_rect.centerx, screen_rect.bottom - 100))
 
-    if titlescreen_ticks < 5000:
-        alpha = 255 - titlescreen_ticks % 5000 * 255 / 5000
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+    if current_ticks < 5000:
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=5000)
 
-    if titlescreen_ticks >= 1000 and game.is_any_key_down():
+    if current_ticks >= 500 and game.is_any_key_down():
         states.change_state(states.MAIN_MENU)
         
     if states.is_exiting_state():
@@ -145,10 +140,8 @@ def run_main_menu():
     global menu_transitioning_started
 
     # obtener información general del juego para uso posterior
-    screen = game.get_screen()
-    screen_rect = game.get_screen_rect()
     keys_down = game.get_keys_down()
-    main_menu_ticks = states.get_current_state_ticks()
+    current_ticks = states.get_current_state_ticks()
     
     if states.is_entering_state():
         music.play_parchment_1()
@@ -168,26 +161,24 @@ def run_main_menu():
 
         if keys_down[pygame.K_RETURN] or keys_down[pygame.K_SPACE]:
             sounds.play_menu_button_tap()
-            menu_transitioning_started = main_menu_ticks
+            menu_transitioning_started = current_ticks
 
     background_zoom = 1
     if menu_transitioning_started:
-        background_zoom = 1 + (main_menu_ticks - menu_transitioning_started) / menu_transition_duration * 5
+        background_zoom = 1 + (current_ticks - menu_transitioning_started) / menu_transition_duration * 5
     draw_titlescreen_background(background_zoom)
 
     menu_content = render_menu_content()
     menu_content.set_alpha(255)
     if menu_transitioning_started:
-        alpha = 255 - (main_menu_ticks - menu_transitioning_started) * 255 / menu_transition_duration * 3
+        alpha = 255 - (current_ticks - menu_transitioning_started) * 255 / menu_transition_duration * 3
         menu_content.set_alpha(alpha)
     interface.draw_surface(menu_content)
 
-    if menu_transitioning_started and main_menu_ticks - menu_transitioning_started < menu_transition_duration:
-        alpha = (main_menu_ticks - menu_transitioning_started) * 255 / menu_transition_duration
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+    if menu_transitioning_started:
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
-    if menu_transitioning_started and main_menu_ticks - menu_transitioning_started >= menu_transition_duration:
+    if menu_transitioning_started and current_ticks - menu_transitioning_started >= menu_transition_duration:
         if menu_button_cursor == 0:
             states.change_state(states.NEW_GAME_MENU)
         elif menu_button_cursor == 1:
@@ -265,12 +256,9 @@ def run_new_game():
     global skin_cursor
 
     # obtener información general del juego para uso posterior
-    screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
     keys_down = game.get_keys_down()
-    menu_ticks = states.get_current_state_ticks()
+    current_ticks = states.get_current_state_ticks()
 
     if states.is_entering_state():
         music.play_parchment_2()
@@ -287,7 +275,7 @@ def run_new_game():
         if keys_down[pygame.K_ESCAPE]:
             sounds.play_menu_button_tap()
             menu_go_back = True
-            menu_transitioning_started = menu_ticks
+            menu_transitioning_started = current_ticks
 
         if keys_down[pygame.K_UP] or (keys_down[pygame.K_w] and menu_button_cursor != 1):
             sounds.play_menu_button_switch()
@@ -328,7 +316,7 @@ def run_new_game():
             if len(player_name_text_input) > 0:
                 sounds.play_menu_button_tap()
                 sounds.play_menu_start_game()
-                menu_transitioning_started = menu_ticks
+                menu_transitioning_started = current_ticks
             else:
                 sounds.play_menu_button_switch()
                 menu_button_cursor = 1
@@ -340,7 +328,7 @@ def run_new_game():
     interface.draw_surface(texts.menu_select_your_tarnished_primary if menu_button_cursor == 0 else texts.menu_select_your_tarnished_secondary, (screen_rect.centerx, screen_rect.top + 100))
     (skin_name, skin_images) = skin_options[skin_cursor]
     skin_name_render = fonts.menu.render(skin_name, True, "white")
-    skin_image = skin_images[menu_ticks // 500 % 4] if menu_button_cursor == 0 else skin_images[0]
+    skin_image = skin_images[current_ticks // 500 % 4] if menu_button_cursor == 0 else skin_images[0]
     skin_image_offset_y = 150
     interface.draw_surface(skin_image, (screen_rect.centerx, screen_rect.top + skin_image_offset_y), interface.anchor_top)
     interface.draw_surface(skin_name_render, (screen_rect.centerx, screen_rect.top + skin_image_offset_y + 110), interface.anchor_top)
@@ -353,7 +341,7 @@ def run_new_game():
         underline = pygame.Surface((player_name_text_input_render.get_width(), 4))
         underline.fill("white")
         interface.draw_surface(underline, (screen_rect.centerx, screen_rect.centery + text_input_offset_y + player_name_text_input_render.get_height() / 2 + 5), interface.anchor_top)
-    if menu_button_cursor == 1 and menu_ticks // 500 % 2 == 0:
+    if menu_button_cursor == 1 and current_ticks // 500 % 2 == 0:
         text_cursor = pygame.Surface((6, 55))
         text_cursor.fill("white")
         text_cursor_offset_x = 0 if not player_name_text_input_render else player_name_text_input_render.get_width() / 2
@@ -362,17 +350,13 @@ def run_new_game():
     # dibujar botón de empezar
     interface.draw_surface(texts.menu_start_doom_primary if menu_button_cursor == 2 else texts.menu_start_doom_secondary, (screen_rect.centerx, screen_rect.bottom - 100))
 
-    if menu_ticks < 500:
-        alpha = 255 - menu_ticks * 255 / 500
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+    if current_ticks < 500:
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
 
     if menu_transitioning_started:
-        alpha = (menu_ticks - menu_transitioning_started) * 255 / menu_transition_duration if menu_ticks - menu_transitioning_started < menu_transition_duration else 255
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
-    if menu_transitioning_started and menu_ticks - menu_transitioning_started > menu_transition_duration:
+    if menu_transitioning_started and current_ticks - menu_transitioning_started > menu_transition_duration:
         if menu_go_back:
             states.change_state(states.MAIN_MENU)
         else:
@@ -385,9 +369,6 @@ def run_new_game():
 
     if states.is_exiting_state():
         music.stop()
-
-    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
-    # states.change_state(states.WIP)
 
 
 loaded_saves = []
@@ -468,14 +449,10 @@ def run_load_game():
         interface.draw_surface(current_page_text, (screen_rect.right - box_gap, screen_rect.bottom - box_gap), interface.anchor_bottomright)
 
     if current_ticks < 500:
-        alpha = 255 - current_ticks * 255 / 500
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
 
     if menu_transitioning_started:
-        alpha = (current_ticks - menu_transitioning_started) * 255 / menu_transition_duration if current_ticks - menu_transitioning_started < menu_transition_duration else 255
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
     if menu_transitioning_started and current_ticks - menu_transitioning_started > menu_transition_duration:
         if menu_go_back:
@@ -510,14 +487,10 @@ def run_loading():
         interface.draw_surface(quote_line, (screen_rect.centerx, screen_rect.centery - 40 * len(quote) / 2 + 40 * i))
 
     if current_ticks < 500:
-        alpha = 255 - current_ticks * 255 / 500
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
 
     if current_ticks > loading_duration:
-        alpha = (current_ticks - loading_duration) * 255 / 500
-        black_foreground.set_alpha(alpha)
-        screen.blit(black_foreground, screen_rect.topleft)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - loading_duration, duration=500)
     
     # después de 5 minutos y medio, pasar a pantalla de exploración
     if current_ticks > loading_duration + 500:
