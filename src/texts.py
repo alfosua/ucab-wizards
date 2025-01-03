@@ -24,4 +24,18 @@ menu_set_your_tarnished_name_secondary = interface.render_text_with_outline(font
 menu_start_doom_primary = interface.render_text_with_outline(fonts.menu, strings.start_doom, True, color_primary, 3, color_tertiary)
 menu_start_doom_secondary = interface.render_text_with_outline(fonts.menu, strings.start_doom, True, color_secondary, 3, color_tertiary)
 
+# textos para pantallas de carga
+loading_ellipsis = [
+    fonts.menu.render("Loading", True, "white"),
+    fonts.menu.render("Loading.", True, "white"),
+    fonts.menu.render("Loading..", True, "white"),
+    fonts.menu.render("Loading...", True, "white"),
+]
+loading_quotes = []
+for quote in strings.loading_quotes:
+    quote_lines = []
+    for line in quote:
+        quote_lines.append(fonts.menu.render(line, True, "white"))
+    loading_quotes.append(quote_lines)
+
 # agregar cada renderización de texto estática aquí...

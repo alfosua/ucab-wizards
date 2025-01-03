@@ -1,7 +1,10 @@
+import datetime
 import math
+import random
 import pygame
 import game
 import interface
+import savedata
 import states
 import fonts
 import texts
@@ -142,6 +145,8 @@ def run_main_menu():
     global menu_transitioning_started
 
     # obtener información general del juego para uso posterior
+    screen = game.get_screen()
+    screen_rect = game.get_screen_rect()
     keys_down = game.get_keys_down()
     main_menu_ticks = states.get_current_state_ticks()
     
@@ -176,6 +181,11 @@ def run_main_menu():
         alpha = 255 - (main_menu_ticks - menu_transitioning_started) * 255 / menu_transition_duration * 3
         menu_content.set_alpha(alpha)
     interface.draw_surface(menu_content)
+
+    if menu_transitioning_started and main_menu_ticks - menu_transitioning_started < menu_transition_duration:
+        alpha = (main_menu_ticks - menu_transitioning_started) * 255 / menu_transition_duration
+        black_foreground.set_alpha(alpha)
+        screen.blit(black_foreground, screen_rect.topleft)
 
     if menu_transitioning_started and main_menu_ticks - menu_transitioning_started >= menu_transition_duration:
         if menu_button_cursor == 0:
@@ -366,6 +376,11 @@ def run_new_game():
         if menu_go_back:
             states.change_state(states.MAIN_MENU)
         else:
+            # inicializar nueva partida en el sistema de guardas
+            saves = savedata.get_saves()
+            savedata.init_save(player_name_text_input, str(skin_cursor), str(datetime.datetime.today()), f"{player_name_text_input}_{len(saves) + 1}.txt")
+
+            # pasar pantalla de carga
             states.change_state(states.LOADING)
 
     if states.is_exiting_state():
@@ -375,42 +390,139 @@ def run_new_game():
     # states.change_state(states.WIP)
 
 
+loaded_saves = []
+
 def run_load_game():
+    global menu_go_back
     global menu_button_cursor
     global menu_transitioning_started
+    global loaded_saves
 
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
     keys_down = game.get_keys_down()
+    current_ticks = states.get_current_state_ticks()
 
     if states.is_entering_state():
         music.play_parchment_3()
         menu_button_cursor = 0
         menu_transitioning_started = 0
+        loaded_saves = savedata.get_saves()
 
-    # TODO
+    if not menu_transitioning_started:
+        if keys_down[pygame.K_ESCAPE]:
+            sounds.play_menu_button_tap()
+            menu_go_back = True
+            menu_transitioning_started = current_ticks
+
+        if keys_down[pygame.K_UP] or keys_down[pygame.K_w]:
+            sounds.play_menu_button_switch()
+            menu_button_cursor = menu_button_cursor - 1
+        if keys_down[pygame.K_DOWN] or keys_down[pygame.K_s]:
+            sounds.play_menu_button_switch()
+            menu_button_cursor = menu_button_cursor + 1
+        menu_button_cursor = menu_button_cursor % len(loaded_saves)
+        
+        if keys_down[pygame.K_SPACE] or keys_down[pygame.K_RETURN]:
+            sounds.play_menu_button_tap()
+            sounds.play_menu_start_game()
+            menu_transitioning_started = current_ticks
+
+    # dibujar la página de guardas
+    page_size = 3
+    page_count = math.ceil(len(loaded_saves) / page_size)
+    current_page = math.floor(menu_button_cursor / page_size)
+    start_index = current_page * page_size
+    end_index = start_index + page_size
+    box_gap = 30
+    box_padding = 20
+    for i, save in enumerate(loaded_saves[start_index:end_index]):
+        idx = i + current_page * page_size
+        box_size = (screen_rect.width - 100*2, 200)
+        skin_size_sqr = box_size[1] - box_padding * 2
+        box_pos = (screen_rect.centerx - box_size[0] / 2, screen_rect.top + box_gap + (box_size[1] + box_gap) * i)
+        box_rect = (box_pos, box_size)
+        pygame.draw.rect(screen, texts.color_primary if menu_button_cursor == idx else texts.color_secondary, box_rect, 4)
+
+        (player_name, skin_idx, date_str, _) = save
+        skin = pygame.transform.scale(skin_options[int(skin_idx)][1][0], (skin_size_sqr, skin_size_sqr))
+        interface.draw_surface(skin, (box_pos[0] + box_padding, box_pos[1] + box_padding), interface.anchor_topleft)
+
+        text_offset = box_pos[0] + box_padding + skin_size_sqr + box_padding
+        text_padding = box_padding * 1.5
+
+        player_name_text = fonts.menu.render(player_name, True, "white")
+        interface.draw_surface(player_name_text, (text_offset, box_pos[1] + text_padding), interface.anchor_topleft)
+
+        skin_text = fonts.menu.render(skin_options[int(skin_idx)][0], True, "white")
+        interface.draw_surface(skin_text, (text_offset, box_pos[1] + box_size[1] / 2), interface.anchor_left)
+
+        date_dt = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f")
+        date_text = fonts.menu.render(date_dt.strftime("%Y-%m-%d %H:%M:%S"), True, "white")
+        interface.draw_surface(date_text, (text_offset, box_pos[1] + box_size[1] - text_padding), interface.anchor_bottomleft)
+    
+    # dibujar contador de páginas
+    if page_count > 1:
+        current_page_text = fonts.menu.render(f"{current_page + 1}-{page_count}", True, "white")
+        interface.draw_surface(current_page_text, (screen_rect.right - box_gap, screen_rect.bottom - box_gap), interface.anchor_bottomright)
+
+    if current_ticks < 500:
+        alpha = 255 - current_ticks * 255 / 500
+        black_foreground.set_alpha(alpha)
+        screen.blit(black_foreground, screen_rect.topleft)
+
+    if menu_transitioning_started:
+        alpha = (current_ticks - menu_transitioning_started) * 255 / menu_transition_duration if current_ticks - menu_transitioning_started < menu_transition_duration else 255
+        black_foreground.set_alpha(alpha)
+        screen.blit(black_foreground, screen_rect.topleft)
+
+    if menu_transitioning_started and current_ticks - menu_transitioning_started > menu_transition_duration:
+        if menu_go_back:
+            states.change_state(states.MAIN_MENU)
+        else:
+            # pasar pantalla de carga
+            states.change_state(states.LOADING)
 
     if states.is_exiting_state():
         music.stop()
 
 
+loading_duration = 10000
+quote_idx = 0
+
 def run_loading():
+    global quote_idx
+
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
-    keys_down = game.get_keys_down()
+    current_ticks = states.get_current_state_ticks()
 
-    # TODO: implementar pantalla de cargar partida
-    # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
-    wip.run()
+    if states.is_entering_state():
+        quote_idx = random.randint(0, len(texts.loading_quotes) - 1)
 
-    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
-    # states.change_state(states.WIP)
+    loading_text = texts.loading_ellipsis[current_ticks // 500 % len(texts.loading_ellipsis)]
+    interface.draw_surface(loading_text, (screen_rect.right - 100, screen_rect.bottom - 30), interface.anchor_bottom)
+
+    quote = texts.loading_quotes[quote_idx]
+    for i, quote_line in enumerate(quote):
+        interface.draw_surface(quote_line, (screen_rect.centerx, screen_rect.centery - 40 * len(quote) / 2 + 40 * i))
+
+    if current_ticks < 500:
+        alpha = 255 - current_ticks * 255 / 500
+        black_foreground.set_alpha(alpha)
+        screen.blit(black_foreground, screen_rect.topleft)
+
+    if current_ticks > loading_duration:
+        alpha = (current_ticks - loading_duration) * 255 / 500
+        black_foreground.set_alpha(alpha)
+        screen.blit(black_foreground, screen_rect.topleft)
+    
+    # después de 5 minutos y medio, pasar a pantalla de exploración
+    if current_ticks > loading_duration + 500:
+        states.change_state(states.EXPLORATION)
+
 
 def run_endgame():
     # obtener información general del juego para uso posterior

@@ -12,6 +12,10 @@ def state_controls():
         states.change_state(states.TITLESCREEN)
     if keys_down[pygame.K_F3]:
         states.change_state(states.MAIN_MENU)
+    if keys_down[pygame.K_F11]:
+        states.change_state(states.LOADING)
+    if keys_down[pygame.K_F12]:
+        states.change_state(states.WIP)
     
     if keys_pressed[pygame.K_LSHIFT] and keys_down[pygame.K_ESCAPE]:
         game.running = False
