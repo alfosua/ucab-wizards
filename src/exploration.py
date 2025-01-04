@@ -109,33 +109,29 @@ def aabb_collision(a_left, a_right, a_front, a_back, b_left, b_right, b_front, b
     
     return (overlap, overlap_x, overlap_y)
 
-def calc_blocks_pos(matriz: str) -> list[tuple[int, int]]:
+def calc_blocks_pos(matriz: list[list[str]]) -> list[tuple[int, int]]:
     # separar la matriz for filas
-    rows = matriz.split("\n")
     pos_vec = []
 
     # dibujar paredes
-    for i, rows in enumerate(rows):
+    for i, rows in enumerate(matriz):
         for j, columna in enumerate(rows):
-            if columna == "#":
+            if columna == "X":
                 pos_vec.append((j * tile_size, i * tile_size))
 
     return pos_vec
 
 def draw_map(mat: str, entidades):
     lienzo = game.get_screen()
-    
-    # separar la matriz for filas
-    filas = mat.split("\n")
 
     # dibujar pisos
-    for i, fila in enumerate(filas):
+    for i, fila in enumerate(mat):
         for j, columna in enumerate(fila):
-            if columna == "." or columna == "D" or columna == "U":
+            if columna == " " or columna == "D" or columna == "U":
                 lienzo.blit(floor, (j * tile_size, i * tile_size))
 
     # dibujar paredes
-    for i, fila in enumerate(filas):
+    for i, fila in enumerate(mat):
         for entidad in entidades:
             (entidad_imagen, (entidad_x, entidad_y)) = entidad
             entidad_fila = math.floor(entidad_y / tile_size)
@@ -145,7 +141,7 @@ def draw_map(mat: str, entidades):
         for j, columna in enumerate(fila):
             posicion_x = j * tile_size
             posicion_y = i * tile_size - tile_size / 4
-            if columna == "#":
+            if columna == "X":
                 lienzo.blit(wall, (posicion_x, posicion_y))
             if columna == "D":
                 lienzo.blit(door_v, (posicion_x, posicion_y))
