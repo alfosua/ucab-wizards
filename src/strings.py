@@ -64,4 +64,30 @@ loading_quotes = [
     ],
 ]
 
+credits = [
+    [
+        "Programming",
+        ["Exploration", ["Santiago Ramirez", "Samuel Vásquez", "Nicola Caringella"]],
+        ["Battle", ["Nicola Caringella", "Pedro Lozada"]],
+        ["World Map", ["Pedro Jesus Lozada", "Samuel Vásquez"]],
+        ["Save System", ["Gabriel Ledezma"]],
+        ["Infrastructure", ["Alfonso Suarez"]],
+    ],
+    [
+        "Art",
+        ["Direction", ["Nicolas Caringella"]],
+        ["Drawing", ["Samuel Vásquez"]],
+        ["Edition", ["Alfonso Suarez"]],
+    ],
+    [
+        "Third-Party Assets",
+        ["World Map Resources", "From the game, \"The Crypt of the Necrodancer\"\nThe Sprite Resources"],
+        ["SFX", "Pixabay"],
+    ],
+    [
+        "Music",
+        ["The Parchment", "Iron Maiden · Senjutsu"],
+    ],
+]
+
 # agregar cada string localizada a utilizar aquí...

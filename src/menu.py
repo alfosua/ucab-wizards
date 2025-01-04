@@ -512,17 +512,74 @@ def run_endgame():
     # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
     # states.change_state(states.WIP)
 
+credits_offset = 0
+
 def run_credits():
+    global credits_offset
+
     # obtener información general del juego para uso posterior
-    screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
-    keys_down = game.get_keys_down()
+    current_ticks = states.get_current_state_ticks()
 
-    # TODO: implementar pantalla de créditos
-    # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
-    wip.run()
+    credits_render = render_credits()
 
-    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
-    # states.change_state(states.WIP)
+    if current_ticks > 2000:
+        if game.is_any_key_down():
+            speed = 2
+        else:
+            speed = 1
+        credits_offset = credits_offset + speed
+
+    
+    interface.draw_surface(images.menu_background)
+    interface.draw_surface(credits_render, (screen_rect.centerx, screen_rect.top - credits_offset), interface.anchor_top)
+
+
+def render_credits() -> pygame.Surface:
+    screen_rect = game.get_screen_rect()
+    result = pygame.Surface((screen_rect.width, 5000), pygame.SRCALPHA)
+
+    offset = 100
+    two_column_values_offset = 50
+
+    interface.draw_surface(images.titlescreen_game_logo, (screen_rect.centerx, offset), interface.anchor_top, target=result)
+    offset = offset + images.titlescreen_game_logo.get_height() + 200
+
+    for section in strings.credits:
+        title = section[0]
+        title_render = fonts.credit_title.render(title, True, "white")
+        interface.draw_surface(title_render, (screen_rect.centerx, offset), interface.anchor_top, target=result)
+        offset = offset + title_render.get_height() + 100
+
+        for item in section[1:]:
+            key = item[0]
+            value = item[1]
+
+            key_render = fonts.credit_body.render(key, True, "white")
+            if isinstance(value, list):
+                interface.draw_surface(key_render, (screen_rect.centerx - 20 - two_column_values_offset, offset), interface.anchor_right, target=result)
+            if isinstance(value, str):
+                interface.draw_surface(key_render, (screen_rect.centerx, offset), target=result)
+
+            if isinstance(value, list):
+                for sub_value in value:
+                    sub_value_render = fonts.credit_body.render(sub_value, True, "white")
+                    interface.draw_surface(sub_value_render, (screen_rect.centerx + 20 - two_column_values_offset, offset), interface.anchor_left, target=result)
+                    offset = offset + sub_value_render.get_height() + 10
+            if isinstance(value, str):
+                offset = offset + sub_value_render.get_height() + 10
+                for line in value.split("\n"):
+                    line_render = fonts.credit_body.render(line, True, "white")
+                    interface.draw_surface(line_render, (screen_rect.centerx, offset), target=result)
+                    offset = offset + line_render.get_height() + 10
+            
+            offset = offset + 25
+        offset = offset + 100
+    
+    interface.draw_surface(images.ucab_logo, (screen_rect.centerx, offset), interface.anchor_top, target=result)
+    offset = offset + images.ucab_logo.get_height() + 200
+
+    interface.draw_surface(images.pygame_logo, (screen_rect.centerx, offset), interface.anchor_top, target=result)
+    offset = offset + images.ucab_logo.get_height() + 200
+    
+    return result
