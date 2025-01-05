@@ -1,8 +1,8 @@
 # Algoritmo de generación de mapa
 import random
 
-ancho = 9
-alto = 9
+ancho = 21
+alto = 21
 
 def generate_map() -> str:
     # Crear un laberinto vacío
@@ -27,7 +27,11 @@ def generate_map() -> str:
         for dx, dy in direcciones:
             nx, ny = x + dx, y + dy
             if 0 < nx < alto - 1 and 0 < ny < ancho - 1 and mapa[nx][ny] == "X":
-                mapa[nx][ny] = " "
+                tipo = random.randint(0, 9)
+                if tipo == 9:
+                    mapa[nx][ny] = "E"
+                else:
+                    mapa[nx][ny] = " "
                 mapa[x + dx // 2][y + dy // 2] = " "
                 stack.append((nx, ny))
                 moved = True
