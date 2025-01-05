@@ -34,7 +34,9 @@ keys_to_track = [
     # Teclas modificadores
     pygame.K_LSHIFT, pygame.K_LCTRL, pygame.K_LALT, pygame.K_RSHIFT, pygame.K_RCTRL, pygame.K_RALT,
 ]
+keys_pressed = {key: False for key in keys_to_track}
 keys_down = {key: False for key in keys_to_track}
+keys_up = {key: False for key in keys_to_track}
 
 def init_frame():
     global running
@@ -44,7 +46,9 @@ def init_frame():
     global current_ticks
     global unescaled_elapsed_ticks
     global unscaled_current_ticks
+    global keys_pressed
     global keys_down
+    global keys_up
     global events
 
     # capturar información para temporizadores
@@ -60,7 +64,9 @@ def init_frame():
             pause_started = unscaled_current_ticks
 
     # inicializar información para seguimiento de teclas
+    keys_pressed = pygame.key.get_pressed()
     keys_down = {key: False for key in keys_to_track}
+    keys_up = {key: False for key in keys_to_track}
 
     events = pygame.event.get()
     # inicialmente procesar los eventos para lógica básica y captura
@@ -69,6 +75,8 @@ def init_frame():
             running = False
         if event.type == pygame.KEYDOWN:
             keys_down[event.key] = True
+        if event.type == pygame.KEYUP:
+            keys_up[event.key] = True
 
 
 def finish_frame():
@@ -105,10 +113,19 @@ def get_elapsed_ticks():
     return elapsed_ticks
 
 def get_keys_pressed():
-    return pygame.key.get_pressed()
+    return keys_pressed
 
 def get_keys_down():
     return keys_down
 
+def get_keys_up():
+    return keys_up
+
+def is_any_key_pressed():
+    return any(keys_pressed)
+
 def is_any_key_down():
     return any(value for value in keys_down.values())
+
+def is_any_key_up():
+    return any(value for value in keys_up.values())

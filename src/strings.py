@@ -75,7 +75,7 @@ credits = [
     ],
     [
         "Art",
-        ["Direction", ["Nicolas Caringella"]],
+        ["Direction", ["Nicola Caringella"]],
         ["Drawing", ["Samuel Vásquez"]],
         ["Edition", ["Alfonso Suarez"]],
     ],

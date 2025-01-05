@@ -8,8 +8,8 @@ wip = pygame.image.load("assets/images/wip.png")
 wip = pygame.transform.scale(wip, (screen_rect.width, screen_rect.width * wip.get_rect().height / wip.get_rect().width))
 
 # imagenes para intro
-ucab_logo = pygame.image.load("assets/images/titlescreen/ucab_logo.png")
-ucab_logo = pygame.transform.scale(ucab_logo, (500, 500))
+ucab_logo = pygame.image.load("assets/images/titlescreen/ucab_logo.jpg")
+ucab_logo = interface.scale_by_screen_width_fraction(ucab_logo, 1)
 pygame_logo = pygame.image.load("assets/images/titlescreen/pygame_logo.png")
 pygame_logo = interface.scale_by_screen_width_fraction(pygame_logo, 2 / 3)
 

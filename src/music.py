@@ -16,6 +16,11 @@ def stop():
     pygame.mixer.music.stop()
     playing = False
 
+def fadeout(time: int):
+    global playing
+    pygame.mixer.music.fadeout(time)
+    playing = False
+
 def is_playing():
     return playing
 
@@ -34,6 +39,9 @@ def play_parchment_2():
 
 def play_parchment_3():
     play("assets/music/parchment_3a.mp3", volume_multiplier=0.33)
+
+def play_parchment_4():
+    play("assets/music/parchment_4a.mp3", volume_multiplier=0.33)
 
 # Si quieres agregar más música, define una función como play_secret
 # apuntando al archivo correcto, como por ejemplo:

@@ -61,6 +61,7 @@ def run():
     current_ticks = states.get_current_state_ticks()
     keys_pressed = game.get_keys_pressed()
     keys_down = game.get_keys_down()
+    keys_up = game.get_keys_up()
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
 
@@ -152,7 +153,7 @@ def run():
 
     if state == INTO_FIGHT:
         if into_fight_started:
-            interface.draw_fade_out(interface.fill_black, ticks=current_ticks - into_fight_started, duration=1000)
+            interface.draw_fade_in(interface.fill_black, ticks=current_ticks - into_fight_started, duration=1000)
         if current_ticks - into_fight_started > 1000:
             states.change_state(states.BATTLE)
 

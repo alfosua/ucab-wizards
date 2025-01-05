@@ -59,7 +59,7 @@ def render_text_with_outline(font: Font, text: str, antialising: bool, fill_colo
     return result
 
 # dibuja una superficie con un efecto de aparación progresiva
-def draw_fade_in(source: Surface,
+def draw_fade_out(source: Surface,
                  position: Vector2 = game.get_screen_rect().center,
                  anchor: Vector2 = anchor_center,
                  ticks: int = None,
@@ -77,7 +77,7 @@ def draw_fade_in(source: Surface,
     draw_surface(source, position, anchor, target)
 
 # dibuja una superficie con un efecto de desaparación progresiva
-def draw_fade_out(source: Surface,
+def draw_fade_in(source: Surface,
                   position: Vector2 = game.get_screen_rect().center,
                   anchor: Vector2 = anchor_center,
                   ticks: int = None,

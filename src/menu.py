@@ -27,47 +27,28 @@ def run_intro():
     if states.is_entering_state():
         sounds.konami_intro.play()
 
-    ucab_logo_rect = images.ucab_logo.get_rect()
-    ucab_logo_pos = (screen_rect.centerx - ucab_logo_rect.width / 2, screen_rect.centery - ucab_logo_rect.height / 2)
     pygame_logo_rect = images.pygame_logo.get_rect()
     pygame_logo_pos = (screen_rect.centerx - pygame_logo_rect.width / 2, screen_rect.centery - pygame_logo_rect.height / 2)
     
     if intro_ticks > 2900 and intro_ticks < 3400:
-        alpha = (intro_ticks - 2900) % 500 * 255 / 500
-        white_background.set_alpha(alpha)
-        white_background.fill("white")
-        screen.blit(white_background, (0, 0))
-        images.ucab_logo.set_alpha(alpha)
-        screen.blit(images.ucab_logo, ucab_logo_pos)
+        interface.draw_fade_in(images.ucab_logo, ticks=intro_ticks - 2900, duration=500)
 
     if intro_ticks > 3400 and intro_ticks < 7100:
-        white_background.set_alpha(255)
-        white_background.fill("white")
-        screen.blit(white_background, (0, 0))
         images.ucab_logo.set_alpha(255)
-        screen.blit(images.ucab_logo, ucab_logo_pos)
+        interface.draw_surface(images.ucab_logo)
 
     if intro_ticks > 7100 and intro_ticks < 7600:
-        alpha = 255 - (intro_ticks - 7100) % 500 * 255 / 500
-        white_background.set_alpha(alpha)
-        white_background.fill("white")
-        screen.blit(white_background, (0, 0))
-        images.ucab_logo.set_alpha(alpha)
-        screen.blit(images.ucab_logo, ucab_logo_pos)
+        interface.draw_fade_out(images.ucab_logo, ticks=intro_ticks - 7100, duration=500)
 
     if intro_ticks > 8400 and intro_ticks < 8900:
-        alpha = (intro_ticks - 8400) % 500 * 255 / 500
-        images.pygame_logo.set_alpha(alpha)
-        screen.blit(images.pygame_logo, pygame_logo_pos)
+        interface.draw_fade_in(images.pygame_logo, ticks=intro_ticks - 8400, duration=500)
 
     if intro_ticks > 8900 and intro_ticks < 12600:
         images.pygame_logo.set_alpha(255)
-        screen.blit(images.pygame_logo, pygame_logo_pos)
+        interface.draw_surface(images.pygame_logo)
 
     if intro_ticks > 12600 and intro_ticks < 13100:
-        alpha = 255 - (intro_ticks - 12600) % 500 * 255 / 500
-        images.pygame_logo.set_alpha(alpha)
-        screen.blit(images.pygame_logo, pygame_logo_pos)
+        interface.draw_fade_out(images.pygame_logo, ticks=intro_ticks - 12600, duration=500)
     
     if intro_ticks > 14000 or game.is_any_key_down():
         states.change_state(states.TITLESCREEN)
@@ -94,7 +75,7 @@ def run_titlescreen():
         interface.draw_surface(texts.menu_press_any_button, (screen_rect.centerx, screen_rect.bottom - 100))
 
     if current_ticks < 5000:
-        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=5000)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=5000)
 
     if current_ticks >= 500 and game.is_any_key_down():
         states.change_state(states.MAIN_MENU)
@@ -176,7 +157,7 @@ def run_main_menu():
     interface.draw_surface(menu_content)
 
     if menu_transitioning_started:
-        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
     if menu_transitioning_started and current_ticks - menu_transitioning_started >= menu_transition_duration:
         if menu_button_cursor == 0:
@@ -351,10 +332,10 @@ def run_new_game():
     interface.draw_surface(texts.menu_start_doom_primary if menu_button_cursor == 2 else texts.menu_start_doom_secondary, (screen_rect.centerx, screen_rect.bottom - 100))
 
     if current_ticks < 500:
-        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=500)
 
     if menu_transitioning_started:
-        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
     if menu_transitioning_started and current_ticks - menu_transitioning_started > menu_transition_duration:
         if menu_go_back:
@@ -410,6 +391,8 @@ def run_load_game():
             sounds.play_menu_start_game()
             menu_transitioning_started = current_ticks
 
+    interface.draw_surface(images.menu_background)
+
     # dibujar la página de guardas
     page_size = 3
     page_count = math.ceil(len(loaded_saves) / page_size)
@@ -449,10 +432,10 @@ def run_load_game():
         interface.draw_surface(current_page_text, (screen_rect.right - box_gap, screen_rect.bottom - box_gap), interface.anchor_bottomright)
 
     if current_ticks < 500:
-        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=500)
 
     if menu_transitioning_started:
-        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks - menu_transitioning_started, duration=menu_transition_duration)
 
     if menu_transitioning_started and current_ticks - menu_transitioning_started > menu_transition_duration:
         if menu_go_back:
@@ -487,10 +470,10 @@ def run_loading():
         interface.draw_surface(quote_line, (screen_rect.centerx, screen_rect.centery - 40 * len(quote) / 2 + 40 * i))
 
     if current_ticks < 500:
-        interface.draw_fade_in(interface.fill_black, ticks=current_ticks, duration=500)
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=500)
 
     if current_ticks > loading_duration:
-        interface.draw_fade_out(interface.fill_black, ticks=current_ticks - loading_duration, duration=500)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks - loading_duration, duration=500)
     
     # después de 5 minutos y medio, pasar a pantalla de exploración
     if current_ticks > loading_duration + 500:
@@ -513,28 +496,51 @@ def run_endgame():
     # states.change_state(states.WIP)
 
 credits_offset = 0
+credits_exit_started = 0
+credits_render = None
 
 def run_credits():
     global credits_offset
+    global credits_exit_started
+    global credits_render
 
     # obtener información general del juego para uso posterior
     screen_rect = game.get_screen_rect()
     current_ticks = states.get_current_state_ticks()
 
-    credits_render = render_credits()
+    if states.is_entering_state():
+        credits_offset = 0
+        credits_exit_started = 0
+        credits_render = render_credits()
+        music.play_parchment_4()
 
     if current_ticks > 2000:
-        if game.is_any_key_down():
-            speed = 2
+        if game.is_any_key_pressed():
+            speed = 8
         else:
             speed = 1
         credits_offset = credits_offset + speed
-
     
+    if not credits_exit_started and credits_offset > 4500:
+        credits_exit_started = current_ticks
+
     interface.draw_surface(images.menu_background)
     interface.draw_surface(credits_render, (screen_rect.centerx, screen_rect.top - credits_offset), interface.anchor_top)
 
-
+    if current_ticks < 2000:
+        interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=2000)
+    
+    if credits_exit_started:
+        if music.is_playing():
+            music.fadeout(2000)
+        interface.draw_fade_in(interface.fill_black, ticks=current_ticks - credits_exit_started, duration=2000)
+    
+    if credits_exit_started and current_ticks - credits_exit_started > 2000:
+        states.change_state(states.INTRO)
+    
+    if states.is_exiting_state():
+        music.stop()
+    
 def render_credits() -> pygame.Surface:
     screen_rect = game.get_screen_rect()
     result = pygame.Surface((screen_rect.width, 5000), pygame.SRCALPHA)
@@ -576,10 +582,16 @@ def render_credits() -> pygame.Surface:
             offset = offset + 25
         offset = offset + 100
     
-    interface.draw_surface(images.ucab_logo, (screen_rect.centerx, offset), interface.anchor_top, target=result)
-    offset = offset + images.ucab_logo.get_height() + 200
+    images.ucab_logo.set_alpha(255)
+    ucab_logo_resized = interface.scale_by_screen_width_fraction(images.ucab_logo, 2 / 3)
+    interface.draw_surface(ucab_logo_resized, (screen_rect.centerx, offset), interface.anchor_top, target=result)
+    offset = offset + ucab_logo_resized.get_height() + 200
 
+    images.pygame_logo.set_alpha(255)
     interface.draw_surface(images.pygame_logo, (screen_rect.centerx, offset), interface.anchor_top, target=result)
-    offset = offset + images.ucab_logo.get_height() + 200
+    offset = offset + images.pygame_logo.get_height() + 400
+
+    thanks_render = fonts.credit_title.render("Thanks for playing!", True, "white")
+    interface.draw_surface(thanks_render, (screen_rect.centerx, offset), interface.anchor_top, target=result)
     
     return result
