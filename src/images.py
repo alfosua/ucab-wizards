@@ -73,14 +73,14 @@ skins_white_showcase = [
 
 
 skins_red_all = [
-    skins_white_front,
-    skins_white_back,
-    skins_white_left,
-    skins_white_right,
-    skins_white_front_walk,
-    skins_white_back_walk,
-    skins_white_left_walk,
-    skins_white_right_walk,
+    skins_white_front.copy(),
+    skins_white_back.copy(),
+    skins_white_left.copy(),
+    skins_white_right.copy(),
+    skins_white_front_walk.copy(),
+    skins_white_back_walk.copy(),
+    skins_white_left_walk.copy(),
+    skins_white_right_walk.copy(),
 ]
 skins_red_showcase = [
     skins_white_showcase[0].copy(),
@@ -99,14 +99,14 @@ for img in skins_red_showcase:
 
 
 skins_gold_all = [
-    skins_white_front,
-    skins_white_back,
-    skins_white_left,
-    skins_white_right,
-    skins_white_front_walk,
-    skins_white_back_walk,
-    skins_white_left_walk,
-    skins_white_right_walk,
+    skins_white_front.copy(),
+    skins_white_back.copy(),
+    skins_white_left.copy(),
+    skins_white_right.copy(),
+    skins_white_front_walk.copy(),
+    skins_white_back_walk.copy(),
+    skins_white_left_walk.copy(),
+    skins_white_right_walk.copy(),
 ]
 skins_gold_showcase = [
     skins_white_showcase[0].copy(),
