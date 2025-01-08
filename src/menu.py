@@ -223,9 +223,9 @@ skin_cursor = 0
 
 skin_options = [
     # nombre, imagenes, ...
-    ("White", images.skins_white),
-    ("Red", images.skins_red),
-    ("Gold", images.skins_gold),
+    ("White", images.skins_white_showcase),
+    ("Red", images.skins_red_showcase),
+    ("Gold", images.skins_gold_showcase),
 ]
 
 def run_new_game():
@@ -342,9 +342,7 @@ def run_new_game():
             states.change_state(states.MAIN_MENU)
         else:
             # inicializar nueva partida en el sistema de guardas
-            saves = savedata.get_saves()
-            savedata.init_save(player_name_text_input, str(skin_cursor), str(datetime.datetime.today()), f"{player_name_text_input}_{len(saves) + 1}.txt")
-
+            savedata.init_save(player_name_text_input, str(skin_cursor), str(datetime.datetime.today()))
             # pasar pantalla de carga
             states.change_state(states.LOADING)
 
@@ -441,7 +439,8 @@ def run_load_game():
         if menu_go_back:
             states.change_state(states.MAIN_MENU)
         else:
-            # pasar pantalla de carga
+            savedata.set_current_save(menu_button_cursor)
+            savedata.load_game()
             states.change_state(states.LOADING)
 
     if states.is_exiting_state():

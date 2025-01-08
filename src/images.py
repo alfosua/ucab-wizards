@@ -34,27 +34,93 @@ menu_background = pygame.image.load("assets/images/menu/background.png")
 menu_background = pygame.transform.scale(menu_background, screen_rect.size)
 
 # imagenes para el selector de skins
-skins_white = [
-    pygame.image.load("assets/images/skins/samuel/front.png"),
-    pygame.image.load("assets/images/skins/samuel/right.png"),
-    pygame.image.load("assets/images/skins/samuel/back.png"),
-    pygame.image.load("assets/images/skins/samuel/left.png"),
+skins_white_front = pygame.image.load("assets/images/skins/samuel/front.png")
+skins_white_right = pygame.image.load("assets/images/skins/samuel/right.png")
+skins_white_back = pygame.image.load("assets/images/skins/samuel/back.png")
+skins_white_left = pygame.image.load("assets/images/skins/samuel/left.png")
+skins_white_front_walk = [ 
+    pygame.image.load("assets/images/skins/samuel/walk/front_01.png"),     
+    pygame.image.load("assets/images/skins/samuel/walk/front_02.png")     
 ]
-skins_red = [
-    skins_white[0].copy(),
-    skins_white[1].copy(),
-    skins_white[2].copy(),
-    skins_white[3].copy(),
+skins_white_back_walk =  [ 
+    pygame.image.load("assets/images/skins/samuel/walk/back_01.png"),     
+    pygame.image.load("assets/images/skins/samuel/walk/back_02.png")     
 ]
-skins_gold = [
-    skins_white[0].copy(),
-    skins_white[1].copy(),
-    skins_white[2].copy(),
-    skins_white[3].copy(),
+skins_white_left_walk =  [ 
+    pygame.image.load("assets/images/skins/samuel/walk/left_01.png"),     
+    pygame.image.load("assets/images/skins/samuel/walk/left_02.png")     
 ]
-for img in skins_red:
+skins_white_right_walk =  [ 
+    pygame.image.load("assets/images/skins/samuel/walk/right_01.png"),     
+    pygame.image.load("assets/images/skins/samuel/walk/right_02.png")     
+]
+skins_white_all = [
+    skins_white_front,
+    skins_white_back,
+    skins_white_left,
+    skins_white_right,
+    skins_white_front_walk,
+    skins_white_back_walk,
+    skins_white_left_walk,
+    skins_white_right_walk,
+]
+skins_white_showcase = [
+    skins_white_front,
+    skins_white_right,
+    skins_white_back,
+    skins_white_left,
+]
+
+
+skins_red_all = [
+    skins_white_front,
+    skins_white_back,
+    skins_white_left,
+    skins_white_right,
+    skins_white_front_walk,
+    skins_white_back_walk,
+    skins_white_left_walk,
+    skins_white_right_walk,
+]
+skins_red_showcase = [
+    skins_white_showcase[0].copy(),
+    skins_white_showcase[1].copy(),
+    skins_white_showcase[2].copy(),
+    skins_white_showcase[3].copy(),
+]
+for img in skins_red_all:
+    if isinstance(img, pygame.Surface):
+        img.fill("red", special_flags=pygame.BLEND_MIN)
+    elif isinstance(img, list):
+        for img2 in img:
+            img2.fill("red", special_flags=pygame.BLEND_MIN)
+for img in skins_red_showcase:
     img.fill("red", special_flags=pygame.BLEND_MIN)
-for img in skins_gold:
+
+
+skins_gold_all = [
+    skins_white_front,
+    skins_white_back,
+    skins_white_left,
+    skins_white_right,
+    skins_white_front_walk,
+    skins_white_back_walk,
+    skins_white_left_walk,
+    skins_white_right_walk,
+]
+skins_gold_showcase = [
+    skins_white_showcase[0].copy(),
+    skins_white_showcase[1].copy(),
+    skins_white_showcase[2].copy(),
+    skins_white_showcase[3].copy(),
+]
+for img in skins_gold_all:
+    if isinstance(img, pygame.Surface):
+        img.fill("red", special_flags=pygame.BLEND_MIN)
+    elif isinstance(img, list):
+        for img2 in img:
+            img2.fill("red", special_flags=pygame.BLEND_MIN)
+for img in skins_gold_showcase:
     img.fill("gold", special_flags=pygame.BLEND_MIN)
 
 # agregar cada imagen a utilizar aquí...

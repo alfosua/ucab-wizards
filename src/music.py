@@ -43,6 +43,8 @@ def play_parchment_3():
 def play_parchment_4():
     play("assets/music/parchment_4a.mp3", volume_multiplier=0.33)
 
+def play_unforgiven():
+    play("assets/music/unforgiven.mp3")
 # Si quieres agregar más música, define una función como play_secret
 # apuntando al archivo correcto, como por ejemplo:
 # def play_my_song():
