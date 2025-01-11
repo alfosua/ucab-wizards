@@ -77,10 +77,10 @@ skins_red_all = [
     skins_white_back.copy(),
     skins_white_left.copy(),
     skins_white_right.copy(),
-    skins_white_front_walk.copy(),
-    skins_white_back_walk.copy(),
-    skins_white_left_walk.copy(),
-    skins_white_right_walk.copy(),
+    [img.copy() for img in skins_white_front_walk],
+    [img.copy() for img in skins_white_back_walk],
+    [img.copy() for img in skins_white_left_walk],
+    [img.copy() for img in skins_white_right_walk],
 ]
 skins_red_showcase = [
     skins_white_showcase[0].copy(),
@@ -103,10 +103,10 @@ skins_gold_all = [
     skins_white_back.copy(),
     skins_white_left.copy(),
     skins_white_right.copy(),
-    skins_white_front_walk.copy(),
-    skins_white_back_walk.copy(),
-    skins_white_left_walk.copy(),
-    skins_white_right_walk.copy(),
+    [img.copy() for img in skins_white_front_walk],
+    [img.copy() for img in skins_white_back_walk],
+    [img.copy() for img in skins_white_left_walk],
+    [img.copy() for img in skins_white_right_walk],
 ]
 skins_gold_showcase = [
     skins_white_showcase[0].copy(),
@@ -116,10 +116,10 @@ skins_gold_showcase = [
 ]
 for img in skins_gold_all:
     if isinstance(img, pygame.Surface):
-        img.fill("red", special_flags=pygame.BLEND_MIN)
+        img.fill("gold", special_flags=pygame.BLEND_MIN)
     elif isinstance(img, list):
         for img2 in img:
-            img2.fill("red", special_flags=pygame.BLEND_MIN)
+            img2.fill("gold", special_flags=pygame.BLEND_MIN)
 for img in skins_gold_showcase:
     img.fill("gold", special_flags=pygame.BLEND_MIN)
 
