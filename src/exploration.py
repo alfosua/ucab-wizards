@@ -190,18 +190,13 @@ def run():
             state = WALKING
     
     # calcular camara para mostrar la posición del jugador según su desplazamiento
-    camera_x = max(-tile_size, player_x - screen_rect.width / 2)
-    camera_y = max(-tile_size, player_y - screen_rect.height / 2)
+    calc_camera_position()
     
     # escalar la imagen del jugador al tamaño de la baldosa
     player = pygame.transform.scale(player, (tile_size, tile_size))
 
     # dibujar el mapa
-    entities = [
-        (player, (player_x, player_y))
-    ]
-    
-    draw_map(map_mat, entities)
+    draw_map()
 
     # mostrar dialogo de conversación cuando este en estado de conversación
     if state == TALKING:
@@ -226,6 +221,54 @@ def run():
     # al salir de este estado de juego, pausar la música actual
     if states.is_exiting_state():
         music.stop()
+
+#
+def calc_camera_position():
+    # variables globales que actualizaremos
+    global camera_x
+    global camera_y
+
+    # obtener instancias principales de juego
+    screen_rect = game.get_screen_rect()
+
+    # calcular limites de la camara
+    # el limite izquierdo es una baldosa antes (mostrará hasta un borde negro)
+    limit_left = -tile_size
+    # el limite derecho es la cantidad entera de baldosas horizontalmente en el mapa mas una baldosa adicional
+    limit_right = len(map_mat[0]) * tile_size - screen_rect.width + tile_size
+    # el limite superior es una baldosa antes (mostrará hasta un borde negro)
+    limit_top = -tile_size
+    # el limite inferior es la cantidad entera de baldosas verticalmente en el mapa mas una baldosa adicional
+    limit_bottom = len(map_mat) * tile_size - screen_rect.height + tile_size
+
+    # calcular posicionamiento de la camará según la posición del jugador
+    player_follow_x = player_x + tile_size / 2 - screen_rect.width / 2
+    player_follow_y = player_y + tile_size / 2 - screen_rect.height / 2
+
+    # si el desplazamiento de seguimiento horizontal del jugador es menor al limite izquierda
+    if player_follow_x < limit_left:
+        # la posición horizontal de la camara es el limite izquierdo
+        camera_x = limit_left
+    # si no, si el limite derecho es menor que el desplazamiento de seguimiento horizontal del jugador
+    elif limit_right < player_follow_x:
+        # la posición horizontal de la camara es el limite derecho
+        camera_x = limit_right
+    else:
+        # de otra forma, la posición de la camara es el desplazamiento de seguimiento
+        camera_x = player_follow_x
+
+    # si el desplazamiento de seguimiento vertical del jugador es menor al limite superior
+    if player_follow_y < limit_top:
+        # la posición vertical de la camara es el limite superior
+        camera_y = limit_top
+    # si no, si el limite inferior es menor que el desplazamiento de seguimiento vertical del jugador
+    elif limit_bottom < player_follow_y:
+        # la posición vertical de la camara es el limite inferior
+        camera_y = limit_bottom
+    else:
+        # de otra forma, la posición de la camara es el desplazamiento de seguimiento
+        camera_y = player_follow_y
+
 
 def calc_bounds(x, y, ancho, alto): 
     left = x + tile_size/2 - ancho/2
@@ -279,35 +322,32 @@ def calc_enemies_pos(matriz: list[list[str]]) -> list[tuple[int, int]]:
 
     return pos_vec
 
-
-def draw_map(mat: str, entidades):
-    lienzo = game.get_screen()
-
-    # dibujar pisos
-    for i, fila in enumerate(mat):
+# funcion para dibujar mapa de mundo
+def draw_map():
+    screen=game.get_screen()
+    # dibujamos el piso entero
+    for i, fila in enumerate(map_mat):
         for j, columna in enumerate(fila):
-            if columna != "#":
-                lienzo.blit(floor, posicion_por_camara(j * tile_size, i * tile_size))
-
-    # dibujar paredes
-    for i, fila in enumerate(mat):
-        for entidad in entidades:
-            (entidad_imagen, (entidad_x, entidad_y)) = entidad
-            entidad_fila = math.floor((entidad_y + tile_size / 2) / tile_size) 
-            if entidad_fila == i:
-                lienzo.blit(entidad_imagen, posicion_por_camara(entidad_x, entidad_y))
-
+            # si la columna es diferente de pared, dibujamos un piso
+            if columna != "X":
+                screen.blit(floor, posencam(tile_size*j, tile_size*i))
+    # dibujamos al jugador, paredes y enemigos
+    for i, fila in enumerate(map_mat):
+        # calculamos en que fila se encuentra el jugador
+        player_fila=math.floor((player_y+tile_size/2)/tile_size)
+        # si el jugador se encuentra en la fila actual que estamos dibujando
+        # dibujamos al jugador
+        if i == player_fila:
+            screen.blit(player, posencam(player_x, player_y))
+        # por cada columna dibujamos una pared, o un enemigo
         for j, columna in enumerate(fila):
-            posicion_x = j * tile_size
-            posicion_y = i * tile_size - tile_size / 4
+            # si la columna es pared, la dibujamos
             if columna == "X":
-                lienzo.blit(wall, posicion_por_camara(posicion_x, posicion_y))
-            if columna == "D":
-                lienzo.blit(door_v, posicion_por_camara(posicion_x, posicion_y))
-            if columna == "U":
-                lienzo.blit(door_h, posicion_por_camara(posicion_x, posicion_y))
+                screen.blit(wall, posencam(tile_size*j, tile_size*i-tile_size/4))
+            # si la columna es enemigo, la dibujamos
             if columna == "E":
-                lienzo.blit(blademaster, posicion_por_camara(posicion_x, posicion_y))
+                screen.blit(blademaster, posencam(tile_size*j, tile_size*i))
 
-def posicion_por_camara(posicion_x, posicion_y):
-    return (posicion_x - camera_x, posicion_y - camera_y)
+# la funcion posencam (posicion en camara) sirve para establecer la camara
+def posencam(x, y):
+    return (x-camera_x, y-camera_y)
