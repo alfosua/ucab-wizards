@@ -6,12 +6,16 @@ import states
 import fonts
 import texts
 import images
+import random
 import sounds
 import strings
 import music
 import map
 import wip # eliminar esta línea al empezar a trabajar en esta pantalla
 
+#Dialog Box
+TalkingBG = pygame.image.load("assets/images/battleresources/MagicMenu.png")
+TalkingBG = pygame.transform.scale(TalkingBG, (700,200))
 
 tile_size = 80
 
@@ -62,6 +66,8 @@ TALKING = 1
 INTO_FIGHT = 2
 state = WALKING
 into_fight_started = 0
+talk_is_starting = False
+Dialogue_IDX = 0
 
 # Debugging
 IGNORE_ENEMY_BLOCK = True
@@ -77,6 +83,8 @@ def run():
     global into_fight_started
     global player_walking
     global player_direction
+    global talk_is_starting
+    global Dialogue_IDX
 
     current_ticks = states.get_current_state_ticks()
     keys_pressed = game.get_keys_pressed()
@@ -192,12 +200,19 @@ def run():
     entities = [
         (player, (player_x, player_y))
     ]
+    
     draw_map(map_mat, entities)
 
     # mostrar dialogo de conversación cuando este en estado de conversación
     if state == TALKING:
-        enemy_dialogue = fonts.menu.render("TU PUTA MADRE", True, "white")
-        screen.blit(enemy_dialogue, (0, 0))
+        if talk_is_starting == True:
+            Dialogue_IDX = random.randint(0, len(strings.Dialogues)-1)
+            talk_is_starting = False
+        screen.blit(TalkingBG, (45, 500))
+        Dialoguestn = strings.Dialogues[Dialogue_IDX]
+        for i, line in enumerate(Dialoguestn.split("\n")):
+            enemy_dialogue = fonts.talk.render(line, True, "white")
+            screen.blit(enemy_dialogue, (65, 525+50*i))
 
     # dentro del estado de empezar batalla
     if state == INTO_FIGHT:

@@ -90,4 +90,14 @@ credits = [
     ],
 ]
 
+#Dialogos de los Enemigos
+Dialogues = [
+    "No podras pasar hasta que me derrotes",
+    "Sabias que existen más de 2,000 especies\nde cactus, con una gran variedad de formas\ny tamaños. La mejor planta del mundo.",
+    "Llevo 40 dias en este laberinto y\nno tengo idea aun de que dice este mapa.",
+    "Soy el mejor mago del equipo rocket y de \nEspaña, si te enfrentas a mi sera un gran \nerror.",
+    "Sabias que el Parque Nacional de Canaima \nes el segundo parque más grande de Vene-\nzuela y el sexto más grande del mundo.",
+    "Soy malo, muy malo, te voy a destruir para \nque veas lo malo que soy.",
+]
+
 # agregar cada string localizada a utilizar aquí...

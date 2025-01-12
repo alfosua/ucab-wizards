@@ -22,7 +22,7 @@ Enemy = pygame.transform.scale (Enemy, (300,300))
 MenuBG = pygame.image.load("assets/images/battleresources/BattleMenu.png")
 MenuBG = pygame.transform.scale (MenuBG, (105, 150))
 MagicBG = pygame.image.load ("assets/images/battleresources/MagicMenu.png")
-MagicBG = pygame.transform.scale (MenuBG, (290, 150))
+MagicBG = pygame.transform.scale (MagicBG, (290, 150))
 
 #Vida
 Enemy_HP = 3
@@ -38,13 +38,14 @@ selected_option = 0
 menu_options = ["Fight", "Magic", "Items", "Run"]
 
 #Menu de magia
-Spells = [ "Fireball (5 Mana)", "Anima Sola (7 Mana)", "Blizzard (10 Mana)", "Tumbleweed (4 Mana)" ]
+Spells = [ "Fireball (5 Mana)", "Heal (7 Mana)", "Rude Buster (10 Mana)", "Tumbleweed (4 Mana)" ]
 Chosing_Spell = 1
 chosen_spell = 4
 selected_spell = 0
 Player_PP = 20
 
 #Estados del menu
+items_menu = 2
 spells_menu = 1
 battle_menu = 0
 current_menu = battle_menu
@@ -95,12 +96,11 @@ def run_battle():
     # Reproducir música solo cuando empieza este estado
     if states.is_entering_state():
         #Musica
-        pygame.mixer.music.load ("assets/music/DemoBattleMusic.mp3") #pueden cambiar la musica si lo desean esto es nomas una prueba
-        pygame.mixer.music.play()
+        music.play_battle()
 
     #Vida del Enemigo y El personaje
     
-    magic_text = font.render(f"MANA= {Player_PP}", True, "Royalblue2")
+    magic_text = fonts.talk.render(f"MANA= {Player_PP}", True, "Royalblue2")
     screen.blit(magic_text, (100, 465))
 
     for i in range(Player_HP):
@@ -122,7 +122,7 @@ def run_battle():
                 handle_menu_selection(selected_option)
 
         elif current_menu == spells_menu:
-            screen.blit(MagicBG, (280, 485))
+            screen.blit(MagicBG, (290, 485))
             draw_menu_magic(screen)
             if keys_down[pygame.K_UP]:
                 selected_spell = (selected_spell - 1) % len(Spells)
@@ -132,17 +132,18 @@ def run_battle():
                 current_menu = battle_menu
             if keys_down[pygame.K_RETURN]:
                 handle_menu_selection_magic(selected_spell)
-            
+    #Limite de la vida        
+    
     if CURRENT_TURN == Enemy_Turn:
         if current_ticks - Turn_started > 1000:
             Player_HP = Player_HP - 1
+            sounds.play_hurt()
             CURRENT_TURN = Player_Turn
             current_menu = battle_menu
 
     # Reproducir música solo cuando empieza este estado
     if states.is_exiting_state():
-        pygame.mixer.music.stop()
-
+        music.stop()
 
 def handle_menu_selection(option):
     pygame.display.set_caption(str(current_ticks))
@@ -152,6 +153,7 @@ def handle_menu_selection(option):
     global Turn_started
 
     if option == 0:
+        sounds.play_damage()
         Enemy_HP = Enemy_HP - 1
         print("Option 1 selected")  
         CURRENT_TURN = Enemy_Turn
@@ -174,23 +176,35 @@ def handle_menu_selection_magic(chosen_spell):
     global CURRENT_TURN
     global Player_PP
     global Turn_started
+    global Player_HP
 
     if chosen_spell == 0 and Player_PP > 5:
         Enemy_HP = Enemy_HP - 2
         Player_PP = Player_PP - 5
         Turn_started = game.current_ticks
+        sounds.spell_fireball()
+
     elif chosen_spell == 1 and Player_PP > 7:
-        Enemy_HP = Enemy_HP - 1
+        Player_HP = Player_HP + 2
         Player_PP = Player_PP - 7
+        if Player_HP > 3:
+            Player_HP = 3
         Turn_started = game.current_ticks
+        sounds.spell_heal()
     elif chosen_spell == 2 and Player_PP > 10:
-        Enemy_HP = Enemy_HP - 4 
+        if chosen_spell == 2 and Player_PP > 10:
+            sounds.spell_rude_buster()
+            sleep(0.20)
+            sounds.spell_rude_buster_hit()
+        Enemy_HP = Enemy_HP - 3 
         Player_PP = Player_PP - 10
         Turn_started = game.current_ticks
+
     elif chosen_spell == 3 and  Player_PP > 4:
         Enemy_HP = Enemy_HP - 1
         Player_PP = Player_PP - 4
         Turn_started = game.current_ticks
+        sounds.spell_tumbleweed()
         
     CURRENT_TURN = Enemy_Turn
 
