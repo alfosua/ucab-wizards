@@ -62,24 +62,34 @@ def run_titlescreen():
     screen_rect = game.get_screen_rect()
     current_ticks = states.get_current_state_ticks()
     
+    # empezar a reproducir la música de la pantalla de título al principio de este estado
     if states.is_entering_state():
         music.play_parchment_0()
-        
+    
+    # muestro el fondo de la pantalla de titulo
     draw_titlescreen_background()
     
+    # realizo uso de la funcion trigonometrica seno, para calcular según el 
+    # momento actual, el desplazamiento vertical del logo para crear
+    # ese efecto de ola (que se mueva de arriba a abajo) 
     game_logo_wave_y = math.sin(current_ticks / 360) * 20
 
+    # muestro el logo principal de juego, según el efecto de ola
     interface.draw_surface(images.titlescreen_game_logo, (screen_rect.centerx, screen_rect.centery - game_logo_wave_y - 50))
 
+    # mostrar texto para el boton de "presionar cualquier boton" cada 3/4 de segundo
     if current_ticks // 750 % 2 == 0:
         interface.draw_surface(texts.menu_press_any_button, (screen_rect.centerx, screen_rect.bottom - 100))
 
+    # muestro efecto de transición de oscuridad a claridad
     if current_ticks < 5000:
         interface.draw_fade_out(interface.fill_black, ticks=current_ticks, duration=5000)
 
+    # si toco cualquier tecla, paso a la pantalla de menú principal
     if current_ticks >= 500 and game.is_any_key_down():
         states.change_state(states.MAIN_MENU)
-        
+
+    # cuando salga del estado, detén la música actual
     if states.is_exiting_state():
         music.stop()
 
@@ -96,6 +106,7 @@ def draw_titlescreen_background(zoom: float = 1):
     result = pygame.Surface(screen_rect.size)
     # dibujar elementos sobre dicha superficie intermediaria
     interface.draw_surface(images.titlescreen_background, screen_rect.center, target=result)
+    # dibujar animación de antorchas
     draw_titlescreen_torch_flame((screen_rect.centerx - 148, screen_rect.centery - 76), result)
     draw_titlescreen_torch_flame((screen_rect.centerx + 158, screen_rect.centery - 76), result)
     # aplicar efecto de zoom en la superficie intermediaria

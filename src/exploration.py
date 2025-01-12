@@ -85,19 +85,27 @@ def run():
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
     
+    # empezar a reproducir la música del modo exploración al principio de este estado
     if states.is_entering_state():
         music.play_unforgiven()
 
+    # realizar calculos para saber cuales son las posiciones de las paredes
     blocks_pos = calc_blocks_pos(map_mat)
+
+    # realizar calculos para saber cuales son las posiciones de los enemigos
     enemies_pos = calc_enemies_pos(map_mat)
 
+    # definir bandera por cada frame que advierte si el jugador está caminando actualmente
     player_walking = False
 
+    # si el jugador se encuentra en estado libre para caminar
     if state == WALKING:
+        # dependiendo de cual tecla direccional el jugador toca,
+        # el personaje efectuara un desplazamiento hacia dicha dirección  
         if keys_pressed[pygame.K_LEFT]:
+            player_x = player_x - speed
             player_direction = "left"
             player_walking = True
-            player_x = player_x - speed
         elif keys_pressed[pygame.K_RIGHT]:
             player_x = player_x + speed
             player_direction = "right"
@@ -111,7 +119,9 @@ def run():
             player_direction = "front"
             player_walking = True
                 
+        # si el personaje esta caminando,
         if player_walking:
+            # definir la animación de caminar según su dirección
             if player_direction == "front":
                 walk = player_front_walk
             elif player_direction == "back":
@@ -120,8 +130,11 @@ def run():
                 walk = player_left_walk
             elif player_direction == "right":
                 walk = player_right_walk
+            # y establecerla como imagen del personaje jugador
+            # realizando una animación de 2 frames por cada 2 quintos de segundo
             player = walk[current_ticks // 400 % 2]
         else:
+            # sino, establecer dibujo del personaje parado según su dirección
             if player_direction == "front":
                 player = player_front
             elif player_direction == "back":
@@ -131,54 +144,71 @@ def run():
             elif player_direction == "right":
                 player = player_right
 
-            
+        # calcular limites del hit box del jugador
         player_bounds = calc_bounds(player_x, player_y, tile_size/2, tile_size/2)
 
+        # por cada posición de pared que exista
         for block_x, block_y in blocks_pos:
+            # calcular limites del hit box de la pared
             block_bounds = calc_bounds(block_x, block_y, tile_size, tile_size)
+            # calcular si el jugador está chocando contra la pared
             (traspaso, traspaso_x, traspaso_y) = aabb_collision(player_bounds, block_bounds)
-            
+            # en caso que haya un traspaso, pues evitar que el personaje repase la pared
             if traspaso:
                 if abs(traspaso_x) < abs(traspaso_y):
                     player_x = player_x + traspaso_x
                 else:
                     player_y = player_y + traspaso_y
 
+        # por cada posición de enemigo que exista
         for enemy_x, enemy_y in enemies_pos:
-            enemy_bounds = calc_bounds(enemy_x, enemy_y, tile_size + 40, tile_size + 40)          
+            # calcular limites del hit box (mas grande de lo normal) del enemigo
+            enemy_bounds = calc_bounds(enemy_x, enemy_y, tile_size + 40, tile_size + 40)       
+            # calcular si el jugador esta tocando al rango del enemigo   
             (traspaso, traspaso_x, traspaso_y) = aabb_collision(player_bounds, enemy_bounds)
-            
+            # en caso que haya un traspaso y se toque la tecla para interactuar
+            # entonces pasar al modo de conversar 
             if traspaso and (keys_down[pygame.K_SPACE] or keys_down[pygame.K_RETURN]):
                 state = TALKING
-                
-    elif state == TALKING:        
+    
+    # si el jugador se encuentra en estado de conversación
+    elif state == TALKING:
+        # si toca el boton de aceptar pelea, pasa a estado empezar batalla 
         if keys_down[pygame.K_SPACE] or keys_down[pygame.K_RETURN]:
             state = INTO_FIGHT
             into_fight_started = current_ticks
+        # si toca el boton para rechazar, regresa al estado libre para caminar
         if keys_down[pygame.K_ESCAPE]:
             state = WALKING
     
+    # calcular camara para mostrar la posición del jugador según su desplazamiento
     camera_x = max(-tile_size, player_x - screen_rect.width / 2)
     camera_y = max(-tile_size, player_y - screen_rect.height / 2)
     
+    # escalar la imagen del jugador al tamaño de la baldosa
     player = pygame.transform.scale(player, (tile_size, tile_size))
 
+    # dibujar el mapa
     entities = [
         (player, (player_x, player_y))
     ]
-    
     draw_map(map_mat, entities)
 
+    # mostrar dialogo de conversación cuando este en estado de conversación
     if state == TALKING:
         enemy_dialogue = fonts.menu.render("TU PUTA MADRE", True, "white")
         screen.blit(enemy_dialogue, (0, 0))
 
+    # dentro del estado de empezar batalla
     if state == INTO_FIGHT:
+        # mostrar transición de claro a oscuro en la pantalla (durante un segundo)
         if into_fight_started:
             interface.draw_fade_in(interface.fill_black, ticks=current_ticks - into_fight_started, duration=1000)
+        # después de un segundo, pasar al modo batalla
         if current_ticks - into_fight_started > 1000:
             states.change_state(states.BATTLE)
 
+    # al salir de este estado de juego, pausar la música actual
     if states.is_exiting_state():
         music.stop()
 
