@@ -4,7 +4,7 @@ import random
 ancho = 21
 alto = 21
 
-def generate_map() -> str:
+def generate_map() -> list[list[str]]:
     # Crear un laberinto vacío
     mapa = [["X" for _ in range(ancho)] for _ in range(alto)]
 

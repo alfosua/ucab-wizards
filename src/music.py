@@ -47,7 +47,11 @@ def play_unforgiven():
     play("assets/music/unforgiven.mp3")
 
 def play_battle():
-    play("assets/music/DemoBattleMusic.mp3")
+    play("assets/music/caught_off_guard.mp3")
+
+def play_boss_battle():
+    play("assets/music/devil_went_down_to_georgia_0.mp3")
+
 # Si quieres agregar más música, define una función como play_secret
 # apuntando al archivo correcto, como por ejemplo:
 # def play_my_song():

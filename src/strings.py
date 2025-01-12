@@ -100,4 +100,14 @@ Dialogues = [
     "Soy malo, muy malo, te voy a destruir para \nque veas lo malo que soy.",
 ]
 
+# Díalogo de inicio de endgme
+endgame_false_win = "¡Has ganado!\nAhora puedes buscar el portal\ny salir de aquí..."
+endgame_start_dialogue = [
+    "Eh, tú...",
+    "¿Crees que has ganado?",
+    "Iluso, jaja...",
+    "¡Tu alma siempre será mía!",
+    "MUA JA JA JA JA JA JA",
+]
+
 # agregar cada string localizada a utilizar aquí...

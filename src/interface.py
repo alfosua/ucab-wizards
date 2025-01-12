@@ -12,6 +12,8 @@ fill_white = pygame.Surface(game.get_screen_rect().size)
 fill_white.fill("white")
 fill_black = pygame.Surface(game.get_screen_rect().size)
 fill_black.fill("black")
+fill_red = pygame.Surface(game.get_screen_rect().size)
+fill_red.fill("red")
 
 # anclas comunes
 anchor_center = Vector2(0.5, 0.5)
@@ -25,11 +27,16 @@ anchor_bottomleft = Vector2(0, 1)
 anchor_bottomright = Vector2(1, 1)
 
 # dibuja una superficie usando el sistema de anclas
-def draw_surface(source: Surface, position: Vector2 = game.get_screen_rect().center, anchor: Vector2 = anchor_center, target: Surface = game.get_screen()):
+def draw_surface(
+        source: Surface,
+        position: Vector2 = game.get_screen_rect().center,
+        anchor: Vector2 = anchor_center,
+        special_flags: int = 0,
+        target: Surface = game.get_screen()):
     source_rect = source.get_rect()
     anchor_offset_x = source_rect.width * anchor.x
     anchor_offset_y = source_rect.height * anchor.y
-    target.blit(source, (position[0] - anchor_offset_x, position[1] - anchor_offset_y))
+    target.blit(source, (position[0] - anchor_offset_x, position[1] - anchor_offset_y), special_flags=special_flags)
 
 
 # escala una imagen según una fracción del ancho de la pantalla
@@ -64,6 +71,7 @@ def draw_fade_out(source: Surface,
                  anchor: Vector2 = anchor_center,
                  ticks: int = None,
                  duration: int = 500,
+                  special_flags: int = 0,
                  target: Surface = game.get_screen()):
     # establecer valores iniciales
     if ticks is None:
@@ -74,7 +82,7 @@ def draw_fade_out(source: Surface,
     source.set_alpha(alpha)
     
     # dibujar en objetivo
-    draw_surface(source, position, anchor, target)
+    draw_surface(source, position, anchor, special_flags, target)
 
 # dibuja una superficie con un efecto de desaparación progresiva
 def draw_fade_in(source: Surface,
@@ -82,6 +90,7 @@ def draw_fade_in(source: Surface,
                   anchor: Vector2 = anchor_center,
                   ticks: int = None,
                   duration: int = 500,
+                  special_flags: int = 0,
                   target: Surface = game.get_screen()):
     # establecer valores iniciales
     if ticks is None:
@@ -92,7 +101,7 @@ def draw_fade_in(source: Surface,
     source.set_alpha(alpha)
     
     # dibujar en objetivo
-    draw_surface(source, position, anchor, target)
+    draw_surface(source, position, anchor, special_flags, target)
 
 # calcula interpolación entre un inicio y fin dado los milisegundos
 # transcurridos con respecto a una duración especifica

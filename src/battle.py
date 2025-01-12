@@ -1,5 +1,6 @@
 import pygame
 import game
+import interface
 import states
 import fonts
 import texts
@@ -10,7 +11,7 @@ import music
 import random
 from time import sleep
 import wip # eliminar esta línea al empezar a trabajar en esta pantalla
-current_ticks = game.get_current_ticks()
+
 #Lienzo
 screen_rect = game.get_screen_rect()
 BG = pygame.image.load("assets/images/battleresources/BattleBG.jpg")
@@ -23,6 +24,10 @@ MenuBG = pygame.image.load("assets/images/battleresources/BattleMenu.png")
 MenuBG = pygame.transform.scale (MenuBG, (105, 150))
 MagicBG = pygame.image.load ("assets/images/battleresources/MagicMenu.png")
 MagicBG = pygame.transform.scale (MagicBG, (290, 150))
+
+#Transición
+entering = True
+boss_battle = False
 
 #Vida
 Enemy_HP = 3
@@ -80,12 +85,12 @@ def run_battle():
     global selected_spell
     global Enemy_HP
     global Turn_started
+    global entering
 
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    pygame.display.set_caption(str(current_ticks))
+    current_ticks = states.get_current_state_ticks()
     keys_pressed = game.get_keys_pressed()
     keys_down = game.get_keys_down()
     # TODO: implementar pantalla de batalla
@@ -96,7 +101,12 @@ def run_battle():
     # Reproducir música solo cuando empieza este estado
     if states.is_entering_state():
         #Musica
-        music.play_battle()
+        if boss_battle:
+            music.play_boss_battle()
+        else:
+            music.play_battle()
+        # activamos la transición
+        entering = True
 
     #Vida del Enemigo y El personaje
     
@@ -109,7 +119,7 @@ def run_battle():
     for i in range(Enemy_HP):
         screen.blit (Health, (500 + 60 * i, 50))
     
-    if CURRENT_TURN == Player_Turn:
+    if CURRENT_TURN == Player_Turn and not entering:
 
         if current_menu == battle_menu:
             screen.blit(MenuBG, (280, 485))
@@ -140,24 +150,32 @@ def run_battle():
             sounds.play_hurt()
             CURRENT_TURN = Player_Turn
             current_menu = battle_menu
+    
+    if current_ticks < 2000:
+        fill = interface.fill_black if not boss_battle else interface.fill_red
+        interface.draw_fade_out(fill, ticks=current_ticks, duration=2000)
+    else:
+        entering = False
+
 
     # Reproducir música solo cuando empieza este estado
     if states.is_exiting_state():
         music.stop()
 
 def handle_menu_selection(option):
-    pygame.display.set_caption(str(current_ticks))
     global Enemy_HP
     global CURRENT_TURN
     global current_menu
     global Turn_started
+    
+    current_ticks = states.get_current_state_ticks()
 
     if option == 0:
         sounds.play_damage()
         Enemy_HP = Enemy_HP - 1
         print("Option 1 selected")  
         CURRENT_TURN = Enemy_Turn
-        Turn_started = game.current_ticks
+        Turn_started = current_ticks
 
     elif option == 1:
         current_menu = spells_menu            
@@ -171,17 +189,18 @@ def handle_menu_selection(option):
 
 
 def handle_menu_selection_magic(chosen_spell):
-    current_ticks = game.get_current_ticks()
     global Enemy_HP
     global CURRENT_TURN
     global Player_PP
     global Turn_started
     global Player_HP
+    
+    current_ticks = states.get_current_state_ticks()
 
     if chosen_spell == 0 and Player_PP > 5:
         Enemy_HP = Enemy_HP - 2
         Player_PP = Player_PP - 5
-        Turn_started = game.current_ticks
+        Turn_started = current_ticks
         sounds.spell_fireball()
 
     elif chosen_spell == 1 and Player_PP > 7:
@@ -189,7 +208,7 @@ def handle_menu_selection_magic(chosen_spell):
         Player_PP = Player_PP - 7
         if Player_HP > 3:
             Player_HP = 3
-        Turn_started = game.current_ticks
+        Turn_started = current_ticks
         sounds.spell_heal()
     elif chosen_spell == 2 and Player_PP > 10:
         if chosen_spell == 2 and Player_PP > 10:
@@ -198,12 +217,12 @@ def handle_menu_selection_magic(chosen_spell):
             sounds.spell_rude_buster_hit()
         Enemy_HP = Enemy_HP - 3 
         Player_PP = Player_PP - 10
-        Turn_started = game.current_ticks
+        Turn_started = current_ticks
 
     elif chosen_spell == 3 and  Player_PP > 4:
         Enemy_HP = Enemy_HP - 1
         Player_PP = Player_PP - 4
-        Turn_started = game.current_ticks
+        Turn_started = current_ticks
         sounds.spell_tumbleweed()
         
     CURRENT_TURN = Enemy_Turn

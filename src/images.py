@@ -123,4 +123,12 @@ for img in skins_gold_all:
 for img in skins_gold_showcase:
     img.fill("gold", special_flags=pygame.BLEND_MIN)
 
+# imagenes para el modo batalla
+battle_background = pygame.image.load("assets/images/battleresources/BattleBG.jpg")
+battle_background = pygame.transform.scale(battle_background, screen_rect.size)
+boss_background = pygame.image.load("assets/images/battleresources/BossBG.png")
+boss_background = pygame.transform.scale(boss_background, screen_rect.size)
+boss = pygame.image.load("assets/images/battleresources/Boss.png")
+boss = pygame.transform.scale (boss, (300,300))
+
 # agregar cada imagen a utilizar aquí...
