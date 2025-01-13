@@ -37,7 +37,7 @@ def init_save(nombre: str, skin: str, fecha: str):
             f.write("\n")
     
     load_skin(skin)
-    set_current_save(idx)
+    set_current_save(idx-1)
 
 # dar todos los guardas
 def get_saves():

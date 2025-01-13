@@ -19,7 +19,7 @@ ENDGAME = 199
 WIP = -100
 
 # inicializar variables de estado
-current_state = EXPLORATION             # el estado inicial es la pantalla de introducción
+current_state = INTRO             # el estado inicial es la pantalla de introducción
 current_state_started = 0         # tick del momento que empezó el actual estado
 next_state = None                 # el estado el cual el juego estará transicionando
 previous_state = None             # el estado anterior del juego
