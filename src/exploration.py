@@ -214,8 +214,6 @@ def run():
                 # cuando recien empiece el endgame
                 sounds.play(sounds.endgame_ambience, loops=-1)
                 sounds.play(sounds.endgame_heart_beat, loops=-1)
-                sounds.play(sounds.endgame_people_screaming, loops=-1)
-                sounds.play(sounds.endgame_people_screaming_hell, loops=-1)
                 sounds.play(sounds.endgame_tense, loops=-1)
                 # calcular distancia del punto de inicio de endgame (según la posición actual del jugador) contra el portal
                 endgame_start_distance_to_portal = math.sqrt((portal_x - player_x)**2 + (portal_y - player_y)**2)
@@ -231,8 +229,6 @@ def run():
 
             # establecer volumen según la distancia en cada sonido ambiental
             sounds.endgame_heart_beat.set_volume(clamp_volume(volume_offset))
-            sounds.endgame_people_screaming.set_volume(clamp_volume(1 - calc_shrinking_as_closer(volume_offset)))
-            sounds.endgame_people_screaming_hell.set_volume(clamp_volume(1 - calc_shrinking_as_closer(volume_offset_hell)))
             sounds.endgame_tense.set_volume(clamp_volume(1 - calc_shrinking_as_closer(volume_offset)))
 
             # calcular limites del portal (mas grande de lo normal) del enemigo
@@ -245,8 +241,6 @@ def run():
                 state_started = current_ticks
                 sounds.endgame_ambience.fadeout(2500)
                 sounds.endgame_heart_beat.fadeout(2500)
-                sounds.endgame_people_screaming.fadeout(2500)
-                sounds.endgame_people_screaming_hell.fadeout(2500)
                 sounds.endgame_tense.fadeout(2500)
     
     # si el jugador se encuentra en estado de conversación
@@ -296,50 +290,13 @@ def run():
     if state == INTO_ENDGAME:
         endgame_ticks = current_ticks - state_started
 
-        # mostrar transición de claro a oscuro en la pantalla (durante un segundo)
         if state_started:
             interface.draw_fade_in(interface.fill_red, ticks=endgame_ticks, duration=2500)
         
         if endgame_ticks > 2500:
             interface.draw_surface(interface.fill_red)
         
-        if endgame_ticks > 5000 and endgame_ticks < 8000:
-            draw_endgame_dialogue(strings.endgame_start_dialogue[0], endgame_ticks - 5000)
-        
-        if endgame_ticks > 8000 and endgame_ticks < 12000:
-            draw_endgame_dialogue(strings.endgame_start_dialogue[1], endgame_ticks - 8000)
-        
-        if endgame_ticks > 12000 and endgame_ticks < 15000:
-            draw_endgame_dialogue(strings.endgame_start_dialogue[2], endgame_ticks - 12000)
-        
-        if endgame_ticks > 15000 and endgame_ticks < 20000:
-            draw_endgame_dialogue(strings.endgame_start_dialogue[3], endgame_ticks - 15000)
-        
-        if endgame_ticks > 20000 and endgame_ticks < 22000:
-            draw_endgame_dialogue(strings.endgame_start_dialogue[4], endgame_ticks - 20000)
-        
-        if endgame_ticks > 22000 and endgame_ticks < 24000:
-            dialogue_text = fonts.talk.render(strings.endgame_start_dialogue[4], True, "black")
-            interface.draw_fade_out(dialogue_text, ticks=endgame_ticks - 22000, duration=2000)
-
-        if endgame_ticks > 22000:
-            if not endgame_evil_laugh_has_played:
-                sounds.endgame_evil_laugh.play(loops=-1)
-                endgame_evil_laugh_has_played = True
-        
-        if endgame_ticks > 25000:
-            if not endgame_snd_evil_laugh_has_played:
-                sounds.menu_possessed_laugh.play(loops=-1)
-                sounds.menu_start_game.play(loops=-1)
-                endgame_snd_evil_laugh_has_played = True
-        
-        if endgame_ticks > 27500 and not endgame_evil_laughes_fade_out:
-            sounds.endgame_evil_laugh.fadeout(2500)
-            sounds.menu_possessed_laugh.fadeout(2500)
-            sounds.menu_start_game.fadeout(2500)
-            endgame_evil_laughes_fade_out = False
-
-        if current_ticks - state_started > 3000:
+        if endgame_ticks > 3000:
             states.change_state(states.BATTLE)
             battle.boss_battle = True
             battle.BG = images.boss_background

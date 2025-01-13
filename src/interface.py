@@ -1,4 +1,3 @@
-import math
 import pygame
 import game
 from pygame import Surface, Vector2, Color
