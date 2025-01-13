@@ -1,4 +1,4 @@
-game_name = "Wizards"
+game_name = "Soul Eaters"
 
 # textos en la pantalla de trabajo en progreso
 press_spacebar_anytime = "Press Spacebar Anytime!"
