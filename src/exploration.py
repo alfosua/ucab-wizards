@@ -62,6 +62,8 @@ camera_x = 0
 camera_y = 0
 speed = 5
 kill_count = 0
+current_enemy_idx = None
+enemies_killed = []
 
 WALKING = 0
 TALKING = 1
@@ -81,7 +83,7 @@ endgame_evil_laughes_fade_out = False
 Dialogue_IDX = 0
 
 # Debugging
-IGNORE_ENEMY_BLOCK = True
+IGNORE_ENEMY_BLOCK = False
 
 def run():
     # obtener información general del juego para uso posterior
@@ -105,6 +107,7 @@ def run():
     global endgame_evil_laugh_has_played
     global endgame_snd_evil_laugh_has_played
     global endgame_evil_laughes_fade_out
+    global current_enemy_idx
 
     current_ticks = states.get_current_state_ticks()
     keys_pressed = game.get_keys_pressed()
@@ -192,7 +195,7 @@ def run():
         if not endgame:
             # verificar si podemos interactuar con los enemigos
             # por cada posición de enemigo que exista
-            for enemy_x, enemy_y in enemies_pos:
+            for i, (enemy_x, enemy_y) in enumerate(enemies_pos):
                 # calcular limites del hit box (mas grande de lo normal) del enemigo
                 enemy_bounds = calc_bounds(enemy_x, enemy_y, tile_size + 40, tile_size + 40)
                 # calcular si el jugador esta tocando al rango del enemigo
@@ -201,6 +204,7 @@ def run():
                 # entonces pasar al modo de conversar 
                 if traspaso and (keys_down[pygame.K_SPACE] or keys_down[pygame.K_RETURN]):
                     state = TALKING
+                    current_enemy_idx = i
         
         if endgame:
             # calcular posición del portal
@@ -225,7 +229,6 @@ def run():
 
             # calcular volumen de sonidos ambientales según la distancia con el jugador
             volume_offset = player_distance_to_portal / endgame_start_distance_to_portal * 3 / 2 if player_distance_to_portal < endgame_start_distance_to_portal * 2 / 3 else 1
-            volume_offset_hell = player_distance_to_portal / endgame_start_distance_to_portal * 3 if player_distance_to_portal < endgame_start_distance_to_portal / 3 else 1
 
             # establecer volumen según la distancia en cada sonido ambiental
             sounds.endgame_heart_beat.set_volume(clamp_volume(volume_offset))
@@ -440,11 +443,15 @@ def calc_portal_pos(matriz: list[list[str]]) -> tuple[int, int]:
 
 def calc_blocks_pos(matriz: list[list[str]]) -> list[tuple[int, int]]:
     pos_vec = []
-
+    enemy_count = 0
     for i, rows in enumerate(matriz):
         for j, columna in enumerate(rows):
-            if columna == "X" or (columna == "E" and not IGNORE_ENEMY_BLOCK):
+            if columna == "X":
                 pos_vec.append((j * tile_size, i * tile_size))
+            if columna == "E" and not IGNORE_ENEMY_BLOCK and not endgame and not enemy_count in enemies_killed:
+                pos_vec.append((j * tile_size, i * tile_size))
+            if columna == "E":
+                enemy_count = enemy_count + 1
 
     return pos_vec
 
@@ -469,6 +476,7 @@ def draw_map():
             if columna != "X":
                 screen.blit(floor, posencam(tile_size*j, tile_size*i))
     # dibujamos al jugador, paredes y enemigos
+    enemy_count = 0
     for i, fila in enumerate(map_mat):
         # calculamos en que fila se encuentra el jugador
         player_fila=math.floor((player_y+tile_size/2)/tile_size)
@@ -482,8 +490,10 @@ def draw_map():
             if columna == "X":
                 screen.blit(wall, posencam(tile_size*j, tile_size*i-tile_size/4))
             # si la columna es enemigo, la dibujamos
-            if columna == "E" and not endgame:
+            if columna == "E" and not endgame and not enemy_count in enemies_killed:
                 screen.blit(blademaster, posencam(tile_size*j, tile_size*i))
+            if columna == "E":
+                enemy_count = enemy_count + 1
 
 # la funcion posencam (posicion en camara) sirve para establecer la camara
 def posencam(x, y):

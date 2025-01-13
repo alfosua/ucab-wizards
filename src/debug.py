@@ -22,7 +22,7 @@ def state_controls():
         states.change_state(states.BATTLE)
     if keys_down[pygame.K_F7]:
         states.change_state(states.VICTORY)
-    if keys_down[pygame.K_F7]:
+    if keys_down[pygame.K_F8]:
         states.change_state(states.GAMEOVER)
     if keys_down[pygame.K_F9]:
         states.change_state(states.ENDGAME)

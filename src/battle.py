@@ -1,3 +1,4 @@
+import math
 import pygame
 import game
 import savedata
@@ -24,7 +25,7 @@ MC = pygame.transform.scale(MC,(240,240))
 Enemy = pygame.image.load("assets/images/battleresources/BattleEnemy.png")
 Enemy = pygame.transform.scale (Enemy, (300,300))
 MenuBG = pygame.image.load("assets/images/battleresources/BattleMenu.png")
-MenuBG = pygame.transform.scale (MenuBG, (105, 150))
+MenuBG = pygame.transform.scale (MenuBG, (150, 150))
 MagicBG = pygame.image.load ("assets/images/battleresources/MagicMenu.png")
 MagicBG = pygame.transform.scale (MagicBG, (290, 150))
 goscreen = pygame.image.load("assets/images/battleresources/GameOver.png")
@@ -37,6 +38,7 @@ boss_battle = False
 #Vida
 Enemy_HP = 4
 Player_HP = 4
+Player_max_HP = 4
 Health = pygame.image.load("assets/images/battleresources/heart.png")
 Health = pygame.transform.scale (Health, (50,50))
 
@@ -45,7 +47,7 @@ Player_Turn = 0
 Enemy_Turn = 1
 CURRENT_TURN = Player_Turn
 selected_option = 0
-menu_options = ["Fight", "Magic", "Items", "Run"]
+menu_options = ["Fight", "Magic", "Meditate", "Run"]
 
 #Menu de magia
 Spells = [ "Fireball (5 Mana)", "Heal (7 Mana)", "Rude Buster (10 Mana)", "Tumbleweed (4 Mana)" ]
@@ -123,7 +125,7 @@ def run_gameover():
             selected_choise = (selected_choise - 1) % len(gameover_option)
         if keys_down[pygame.K_DOWN]:
             selected_choise = (selected_choise + 1) % len(gameover_option)
-        if keys_down[pygame.K_RETURN]:
+        if keys_down[pygame.K_RETURN] or keys_down[pygame.K_SPACE]:
             death_options(selected_choise)
 
     # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
@@ -154,7 +156,6 @@ def run_battle():
     global Turn_started
     global entering
 
-
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
@@ -179,7 +180,7 @@ def run_battle():
     #Vida del Enemigo y El personaje
     
     magic_text = fonts.talk.render(f"MANA= {Player_PP}", True, "Royalblue2")
-    screen.blit(magic_text, (100, 465))
+    screen.blit(magic_text, (100, 380))
 
     for i in range(Player_HP):
         screen.blit(Health, (100 + 60 * i, 415))
@@ -195,7 +196,7 @@ def run_battle():
                 selected_option = (selected_option - 1) % len(menu_options)
             if keys_down[pygame.K_DOWN]:
                 selected_option = (selected_option + 1) % len(menu_options)
-            if keys_down[pygame.K_RETURN]:
+            if keys_down[pygame.K_RETURN] or keys_down[pygame.K_SPACE]:
                 handle_menu_selection(selected_option)
 
         elif current_menu == spells_menu:
@@ -205,25 +206,24 @@ def run_battle():
                 selected_spell = (selected_spell - 1) % len(Spells)
             if keys_down[pygame.K_DOWN]:
                 selected_spell = (selected_spell + 1) % len(Spells)
-            if keys_down[pygame.K_x]:
+            if keys_down[pygame.K_x] or keys_down[pygame.K_ESCAPE]:
                 current_menu = battle_menu
-            if keys_down[pygame.K_RETURN]:
+            if keys_down[pygame.K_RETURN] or keys_down[pygame.K_SPACE]:
                 handle_menu_selection_magic(selected_spell)    
 
     if CURRENT_TURN == Enemy_Turn:
-        
         if Enemy_HP > 0:
             if current_ticks - Turn_started > 1000:
                 Player_HP = Player_HP - 1
                 sounds.play_hurt()
                 CURRENT_TURN = Player_Turn
                 current_menu = battle_menu
-                
         if Enemy_HP <= 0:
-            states.change_state(states.EXPLORATION)
-            exploration.state = exploration.WALKING
-            Enemy_HP = 3
-            CURRENT_TURN = Player_Turn
+            if boss_battle:
+                states.change_state(states.VICTORY)
+            else:
+                change_to_exploration()
+                exploration.kill_count = exploration.kill_count + 1
 
     if current_ticks < 2000:
         fill = interface.fill_black if not boss_battle else interface.fill_red
@@ -234,9 +234,22 @@ def run_battle():
     if Player_HP <= 0:
         states.change_state(states.GAMEOVER)
 
-# Reproducir música solo cuando empieza este estado
-if states.is_exiting_state():
-    music.stop()
+    # Reproducir música solo cuando empieza este estado
+    if states.is_exiting_state():
+        music.stop()
+
+def change_to_exploration():
+    global Player_HP
+    global Player_max_HP
+    global Enemy_HP
+    global CURRENT_TURN
+    states.change_state(states.EXPLORATION)
+    exploration.state = exploration.WALKING
+    exploration.enemies_killed.append(exploration.current_enemy_idx)
+    Player_max_HP = 4 + math.floor(exploration.kill_count / 3)
+    Player_HP = Player_max_HP
+    Enemy_HP = random.randint(3, 5)
+    CURRENT_TURN = Player_Turn
 
 def handle_menu_selection(option):
     global Enemy_HP
@@ -250,24 +263,18 @@ def handle_menu_selection(option):
     if option == 0:
         sounds.play_damage()
         Enemy_HP = Enemy_HP - 1
-        print("Option 1 selected")  
         CURRENT_TURN = Enemy_Turn
         Turn_started = current_ticks
-    
     elif option == 1:
-        current_menu = spells_menu            
-        print("Option 2 selected")
-            
+        current_menu = spells_menu
     elif option == 2:
-        print("Option 3 selected")
         Player_PP = Player_PP + 15
         if Player_PP > 20:
             Player_PP = 20
         CURRENT_TURN = Enemy_Turn
         Turn_started = current_ticks
-    elif option == 3:
-        print("Option 4 selected")
-
+    elif option == 3 and not boss_battle:
+        change_to_exploration()
 
 def handle_menu_selection_magic(chosen_spell):
     global Enemy_HP
@@ -278,47 +285,45 @@ def handle_menu_selection_magic(chosen_spell):
     
     current_ticks = states.get_current_state_ticks()
 
-    if chosen_spell == 0 and Player_PP > 5:
+    if chosen_spell == 0 and Player_PP >= 5:
         Enemy_HP = Enemy_HP - 2
         Player_PP = Player_PP - 5
-        Turn_started = current_ticks
         sounds.spell_fireball()
 
-    elif chosen_spell == 1 and Player_PP > 7:
+    elif chosen_spell == 1 and Player_PP >= 7:
         Player_HP = Player_HP + 2
         Player_PP = Player_PP - 7
-        if Player_HP > 3:
-            Player_HP = 3
-        Turn_started = current_ticks
+        if Player_HP > Player_max_HP:
+            Player_HP = Player_max_HP
         sounds.spell_heal()
-    elif chosen_spell == 2 and Player_PP > 10:
-        if chosen_spell == 2 and Player_PP > 10:
+
+    elif chosen_spell == 2 and Player_PP >= 10:
+        if chosen_spell == 2 and Player_PP >= 10:
             sounds.spell_rude_buster()
             sleep(0.20)
             sounds.spell_rude_buster_hit()
         Enemy_HP = Enemy_HP - 3 
         Player_PP = Player_PP - 10
-        Turn_started = current_ticks
 
-    elif chosen_spell == 3 and  Player_PP > 4:
+    elif chosen_spell == 3 and  Player_PP >= 4:
         Enemy_HP = Enemy_HP - 1
         Player_PP = Player_PP - 4
-        Turn_started = current_ticks
         sounds.spell_tumbleweed()
         
     CURRENT_TURN = Enemy_Turn
+    Turn_started = current_ticks
     
 def run_victory():
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
-    keys_down = game.get_keys_down()
+    current_ticks = states.get_current_state_ticks()
 
-    # TODO: implementar pantalla de victoria
-    # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
-    wip.run()
+    screen.fill("red")
+    win_str = "Tu alma ha sido liberada.\n¡Has ganado el juego! :D"
+    for i, line in enumerate(win_str.split("\n")):
+        line_text = fonts.credit_body.render(line, True, "white")
+        interface.draw_surface(line_text,  (screen_rect.centerx, screen_rect.centery + i * 50 - 30))
 
-    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
-    # states.change_state(states.WIP)
+    if current_ticks > 5000 or game.is_any_key_down():
+        states.change_state(states.CREDITS)

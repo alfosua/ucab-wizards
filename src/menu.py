@@ -18,17 +18,12 @@ white_background = pygame.Surface(game.get_screen_rect().size)
 
 
 def run_intro():
-    screen = game.get_screen()
-    screen_rect = game.get_screen_rect()
     current_ticks = game.get_current_ticks()
 
     intro_ticks = current_ticks - states.get_started_at()
 
     if states.is_entering_state():
         sounds.konami_intro.play()
-
-    pygame_logo_rect = images.pygame_logo.get_rect()
-    pygame_logo_pos = (screen_rect.centerx - pygame_logo_rect.width / 2, screen_rect.centery - pygame_logo_rect.height / 2)
     
     if intro_ticks > 2900 and intro_ticks < 3400:
         interface.draw_fade_in(images.ucab_logo, ticks=intro_ticks - 2900, duration=500)
