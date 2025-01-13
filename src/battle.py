@@ -1,5 +1,6 @@
 import pygame
 import game
+import savedata
 import interface
 import states
 import fonts
@@ -9,6 +10,8 @@ import sounds
 import strings
 import music
 import random
+import exploration
+import menu
 from time import sleep
 import wip # eliminar esta línea al empezar a trabajar en esta pantalla
 
@@ -24,14 +27,16 @@ MenuBG = pygame.image.load("assets/images/battleresources/BattleMenu.png")
 MenuBG = pygame.transform.scale (MenuBG, (105, 150))
 MagicBG = pygame.image.load ("assets/images/battleresources/MagicMenu.png")
 MagicBG = pygame.transform.scale (MagicBG, (290, 150))
+goscreen = pygame.image.load("assets/images/battleresources/GameOver.png")
+goscreen = pygame.transform.scale(goscreen, (500, 300))
 
 #Transición
 entering = True
 boss_battle = False
 
 #Vida
-Enemy_HP = 3
-Player_HP = 3
+Enemy_HP = 4
+Player_HP = 4
 Health = pygame.image.load("assets/images/battleresources/heart.png")
 Health = pygame.transform.scale (Health, (50,50))
 
@@ -53,6 +58,7 @@ Player_PP = 20
 items_menu = 2
 spells_menu = 1
 battle_menu = 0
+game_over_menu = 2
 current_menu = battle_menu
 
 #Tiempo
@@ -60,6 +66,68 @@ clock = pygame.time.Clock()
 Turn_started = 0
 
 font = pygame.font.SysFont(None, 36)
+
+#Menu de Muerte
+gameover_option = [ "Restart", "Main Menu" ]
+choise = 0
+selected_choise = 0
+
+def draw_menu_death(screen):
+    font = pygame.font.SysFont(None, 32)
+    for z, choise in enumerate(gameover_option):
+        color = (255, 0, 0) if z == selected_choise else (255, 255, 255)
+        text = font.render(choise, True, color)
+        screen.blit(text, (300, 500 + z * 50))
+
+def death_options(choise):
+    global current_menu
+    global battle_menu
+    global CURRENT_TURN
+    global Player_HP
+    if choise == 0:
+        states.change_state(states.LOADING)
+        exploration.state = exploration.WALKING
+        savedata.load_game()
+        current_menu = battle_menu
+        CURRENT_TURN = Player_Turn
+        
+    elif choise == 1:
+        states.change_state(states.MAIN_MENU)
+        current_menu = battle_menu
+        CURRENT_TURN = Player_Turn  
+    Player_HP = 4
+
+
+def run_gameover():
+    global game_over_menu
+    global spells_menu
+    global battle_menu
+    global game_over_menu
+    global current_menu
+    global selected_choise
+
+    # obtener información general del juego para uso posterior
+    screen = game.get_screen()
+    screen_rect = game.get_screen_rect()
+    current_ticks = game.get_current_ticks()
+    keys_pressed = game.get_keys_pressed()
+    keys_down = game.get_keys_down()
+    current_menu = game_over_menu
+    # TODO: implementar pantalla de game over
+    # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
+    screen.fill("black")
+    screen.blit(goscreen, (160, 20))
+    if current_menu == game_over_menu:
+        draw_menu_death(screen)
+        if keys_down[pygame.K_UP]:
+            selected_choise = (selected_choise - 1) % len(gameover_option)
+        if keys_down[pygame.K_DOWN]:
+            selected_choise = (selected_choise + 1) % len(gameover_option)
+        if keys_down[pygame.K_RETURN]:
+            death_options(selected_choise)
+
+    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
+    # states.change_state(states.WIP)
 
 def draw_menu(screen):
     font = pygame.font.SysFont(None, 36)
@@ -75,7 +143,6 @@ def draw_menu_magic(screen):
         text = font.render(chosen_spell, True, color)
         screen.blit(text, (300, 500 + f * 30))
 
-
 def run_battle():
     global selected_option 
     global Player_HP
@@ -87,13 +154,14 @@ def run_battle():
     global Turn_started
     global entering
 
+
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
     screen_rect = game.get_screen_rect()
     current_ticks = states.get_current_state_ticks()
     keys_pressed = game.get_keys_pressed()
     keys_down = game.get_keys_down()
-    # TODO: implementar pantalla de batalla
+    
     screen.blit(BG, (0,0))
     screen.blit(MC,(75,420))
     screen.blit(Enemy, (500,30))
@@ -120,7 +188,6 @@ def run_battle():
         screen.blit (Health, (500 + 60 * i, 50))
     
     if CURRENT_TURN == Player_Turn and not entering:
-
         if current_menu == battle_menu:
             screen.blit(MenuBG, (280, 485))
             draw_menu(screen)
@@ -141,32 +208,42 @@ def run_battle():
             if keys_down[pygame.K_x]:
                 current_menu = battle_menu
             if keys_down[pygame.K_RETURN]:
-                handle_menu_selection_magic(selected_spell)
-    #Limite de la vida        
-    
+                handle_menu_selection_magic(selected_spell)    
+
     if CURRENT_TURN == Enemy_Turn:
-        if current_ticks - Turn_started > 1000:
-            Player_HP = Player_HP - 1
-            sounds.play_hurt()
+        
+        if Enemy_HP > 0:
+            if current_ticks - Turn_started > 1000:
+                Player_HP = Player_HP - 1
+                sounds.play_hurt()
+                CURRENT_TURN = Player_Turn
+                current_menu = battle_menu
+                
+        if Enemy_HP <= 0:
+            states.change_state(states.EXPLORATION)
+            exploration.state = exploration.WALKING
+            Enemy_HP = 3
             CURRENT_TURN = Player_Turn
-            current_menu = battle_menu
-    
+
     if current_ticks < 2000:
         fill = interface.fill_black if not boss_battle else interface.fill_red
         interface.draw_fade_out(fill, ticks=current_ticks, duration=2000)
     else:
         entering = False
+    
+    if Player_HP <= 0:
+        states.change_state(states.GAMEOVER)
 
-
-    # Reproducir música solo cuando empieza este estado
-    if states.is_exiting_state():
-        music.stop()
+# Reproducir música solo cuando empieza este estado
+if states.is_exiting_state():
+    music.stop()
 
 def handle_menu_selection(option):
     global Enemy_HP
     global CURRENT_TURN
     global current_menu
     global Turn_started
+    global Player_PP
     
     current_ticks = states.get_current_state_ticks()
 
@@ -176,14 +253,18 @@ def handle_menu_selection(option):
         print("Option 1 selected")  
         CURRENT_TURN = Enemy_Turn
         Turn_started = current_ticks
-
+    
     elif option == 1:
         current_menu = spells_menu            
         print("Option 2 selected")
             
     elif option == 2:
         print("Option 3 selected")
-
+        Player_PP = Player_PP + 15
+        if Player_PP > 20:
+            Player_PP = 20
+        CURRENT_TURN = Enemy_Turn
+        Turn_started = current_ticks
     elif option == 3:
         print("Option 4 selected")
 
@@ -226,22 +307,7 @@ def handle_menu_selection_magic(chosen_spell):
         sounds.spell_tumbleweed()
         
     CURRENT_TURN = Enemy_Turn
-
-def run_gameover():
-    # obtener información general del juego para uso posterior
-    screen = game.get_screen()
-    screen_rect = game.get_screen_rect()
-    current_ticks = game.get_current_ticks()
-    keys_pressed = game.get_keys_pressed()
-    keys_down = game.get_keys_down()
-
-    # TODO: implementar pantalla de game over
-    # mostrar pantalla de trabajo en progreso (eliminar al empezar a trabajar en esta pantalla)
-    wip.run()
-
-    # para cambiar de estado de juego usa la siguiente línea de código (descomentada)
-    # states.change_state(states.WIP)
-
+    
 def run_victory():
     # obtener información general del juego para uso posterior
     screen = game.get_screen()
