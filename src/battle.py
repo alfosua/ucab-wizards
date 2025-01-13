@@ -224,6 +224,7 @@ def run_battle():
             else:
                 change_to_exploration()
                 exploration.kill_count = exploration.kill_count + 1
+                savedata.save_game()
 
     if current_ticks < 2000:
         fill = interface.fill_black if not boss_battle else interface.fill_red

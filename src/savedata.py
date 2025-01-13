@@ -1,5 +1,6 @@
 import os
 
+import battle
 import exploration
 
 current_save = 0
@@ -21,20 +22,26 @@ def init_save(nombre: str, skin: str, fecha: str):
     archivo = str(idx) + "_" + nombre + ".txt"
     with open("saves/index.txt", "a", encoding='utf-8') as f:
         f.write(nombre + "," + skin + "," + fecha + "," + archivo + "\n")
+        
+    exploration.state = exploration.WALKING
+    exploration.state_started = 0
+    exploration.state_is_starting = False
+
+    exploration.player_x = exploration.tile_size * 1
+    exploration.player_y = exploration.tile_size * 1
+    exploration.camera_x = 0
+    exploration.camera_y = 0
+    exploration.kill_count = 0
+    exploration.enemies_killed = []
 
     with open("saves/" + archivo, "w") as f:
-        f.write(str(exploration.tile_size * 1) + "\n")
-        f.write(str(exploration.tile_size * 1) + "\n")
-        f.write(str(0) + "\n")
-        f.write(str(0) + "\n")
-
-        # TODO: inicializar la info de batalla
-
+        f.write(str(exploration.player_x) + "\n")
+        f.write(str(exploration.player_y) + "\n")
+        f.write(str(exploration.camera_x) + "\n")
+        f.write(str(exploration.camera_y) + "\n")
+        f.write(str(exploration.kill_count) + "\n")
         for fila in exploration.map_mat:
-            for columna in fila:
-                f.write(columna)
-                f.write(",")
-            f.write("\n")
+            f.write(",".join(fila) + "\n")
     
     load_skin(skin)
     set_current_save(idx-1)
@@ -84,16 +91,21 @@ def load_game():
     exploration.player_y = int(data[1])
     exploration.camera_x = int(data[2])
     exploration.camera_y = int(data[3])
-
-    # TODO: cargar la info de batalla
-
+    exploration.kill_count = int(data[4])
+    for i in range(exploration.kill_count):
+        exploration.enemies_killed.append(int(data[4+i]))
     exploration.map_mat = []
-    for fila in data[4:]:
+    for fila in data[5+exploration.kill_count:]:
         columnas = fila.split(",")
         fila_mat = []
         for columna in columnas:
             fila_mat.append(columna)
         exploration.map_mat.append(fila_mat)
+    
+    # establecer valores fijos al cargar una nueva partida
+    exploration.state = exploration.WALKING
+    exploration.state_started = 0
+    exploration.state_is_starting = False
 
 # carga la skin según la seleccionada
 def load_skin(skin: str):
@@ -123,13 +135,12 @@ def save_game():
     (player_name, skin, date, archivo) = save
 
     with open("saves/" + archivo, "w") as f:
-        f.write(str(exploration.player_x) + "\n")
-        f.write(str(exploration.player_y) + "\n")
-        f.write(str(exploration.camera_x) + "\n")
-        f.write(str(exploration.camera_y) + "\n")
-
-        # TODO: guardar la info de batalla
-
+        f.write(str(int(exploration.player_x)) + "\n")
+        f.write(str(int(exploration.player_y)) + "\n")
+        f.write(str(int(exploration.camera_x)) + "\n")
+        f.write(str(int(exploration.camera_y)) + "\n")
+        f.write(str(int(exploration.kill_count)) + "\n")
+        for enemy_idx in exploration.enemies_killed:
+            f.write(str(int(enemy_idx)) + "\n")
         for fila in exploration.map_mat:
-            f.write(fila.join(","))
-            f.write("\n")
+            f.write(",".join(fila) + "\n")
