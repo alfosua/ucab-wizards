@@ -35,7 +35,7 @@ jobs:
           # NOTE: put your own distribution build steps here.
           pip install -r requirements.txt
           python -m pip install pyinstaller
-          python -m pyinstaller src/main.py --onefile --noconsole --name Soul Eaters
+          pyinstaller src/main.py --onefile --noconsole --name Soul Eaters
           cp -R src/assets dist/assets
 
       - name: Upload distributions
